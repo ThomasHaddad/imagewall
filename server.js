@@ -5,6 +5,7 @@ var mongoose = require('mongoose');
 var fs = require('fs');
 var path = require('path');
 var bodyParser = require('body-parser');
+var multer  = require('multer');
 
 mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
     if (error) {
@@ -21,9 +22,11 @@ io.on('connection', function(socket){
 
 var Schema = mongoose.Schema;
 var ImageSchema = new Schema({
-    url: String,
-    position: String,
-    owner: String
+    data: Buffer,
+    contentType:String,
+    position: {},
+    owner: String,
+    score: Number
 });
 // Mongoose Model definition
 var Image = mongoose.model('images', ImageSchema);
@@ -31,6 +34,7 @@ var Image = mongoose.model('images', ImageSchema);
 // Bootstrap express
 app.set('view engine', 'jade');
 app.use(bodyParser({uploadDir:'/tmp'}));
+app.use(multer({uploadDir:'/tmp'}));
 
 // URLS management
 
@@ -43,10 +47,20 @@ app.get('/add', function (req, res) {
 });
 
 app.post('/upload', function (req, res) {
-    console.log(req.files);
-    //var tempPath = req.files.file.path;
+    var image=new Image;
+    var tempPath = req.files.image.path;
+    image.data=fs.readFileSync(tempPath);
+    image.contentType=req.files.image.mimetype;
+    image.save(function(err,image){
+        if (err) throw err;
+        console.error('image saved to mongo');
+        Image.findById(image, function (err, doc) {
+            if (err) return next(err);
+            res.contentType(doc.contentType);
+            res.send(doc.data);
+        });
+    });
     //socket.emit('form image', tempPath);
-    //console.log(tempPath);
     return false;
     //    targetPath = path.resolve('./uploads/image.png');
     //if (path.extname(req.files.file.name).toLowerCase() === '.png') {
