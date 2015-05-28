@@ -1,0 +1,23 @@
+html
+    head
+        link(rel='stylesheet', href='/css/styles.css')
+        title ImageWall |
+            !=  title
+    body
+        h1!= message
+        a(href='add') add an image
+        div.imageWall
+            - each image in images
+                img(src='data:image/jpeg;base64,' + image.data)
+
+    script(src="/socket.io/socket.io.js")
+    script.
+        var socket = io();
+        socket.on("imageAdded", function (image, buffer) {
+            if (image) {
+                console.log(" image: from client side");
+                // code to handle buffer like drawing with canvas** <--- is canvas drawing/library a requirement?  is there an alternative? another quick and dirty solution?
+                console.log(image);
+                // what can we do here to serve the image onto an img tag?
+            }
+        });
