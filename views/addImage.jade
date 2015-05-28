@@ -1,0 +1,9 @@
+html
+    head
+        title  ImageWall |
+            != title
+    body
+        h1!= message
+
+        form(action="...", method="post", enctype="multipart/form-data")
+            input(type="file", name="displayImage")
