@@ -17,14 +17,14 @@ io.on('connection', function(socket){
 });
 
 var Schema = mongoose.Schema;
-var UserSchema = new Schema({
-    first_name: String,
-    last_name: String,
-    email: String
+var ImageSchema = new Schema({
+    url: String,
+    position: String,
+    owner: String
 });
 
 // Mongoose Model definition
-var User = mongoose.model('users', UserSchema);
+var Image = mongoose.model('images', ImageSchema);
 
 // Bootstrap express
 app.set('view engine', 'jade');
