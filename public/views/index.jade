@@ -1,6 +1,7 @@
 html
     head
         link(rel='stylesheet', href='/css/styles.css')
+        script(src="/js/jquery.js")
         title ImageWall |
             !=  title
     body
@@ -16,8 +17,7 @@ html
         socket.on("imageAdded", function (image, buffer) {
             if (image) {
                 console.log(" image: from client side");
-                // code to handle buffer like drawing with canvas** <--- is canvas drawing/library a requirement?  is there an alternative? another quick and dirty solution?
                 console.log(image);
-                // what can we do here to serve the image onto an img tag?
+                $('.imageWall').append('<img src="data:image/jpeg;base64,'+ image+'">')
             }
         });

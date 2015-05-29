@@ -80,7 +80,7 @@ app.post('/upload', function (req, res) {
         console.error('image saved to mongo');
         Image.findById(image, function (err, doc) {
             if (err) return next(err);
-            io.sockets.emit('imageAdded', doc.data);
+            io.emit('imageAdded', doc.data.toString('base64'));
             res.contentType(doc.contentType);
             res.send(doc.data);
         });
