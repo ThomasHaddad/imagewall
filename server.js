@@ -7,17 +7,19 @@ var io = require('socket.io')(http);
 var mongoose = require('mongoose');
 var fs = require('fs');
 var path = require('path');
-var bodyParser = require('body-parser');
+//var bodyParser = require('body-parser');
 var multer = require('multer');
 var _ = require('lodash');
+var cookieParser = require('cookie-parser');
 
 //Configuring modules
 
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/public/views');
-app.use(bodyParser({uploadDir: '/tmp'}));
+//app.use(bodyParser({uploadDir: '/tmp'}));
 app.use(multer({uploadDir: '/tmp'}));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser());
 
 // database connection
 mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
@@ -30,12 +32,17 @@ var ImageSchema = new Schema({
     data: Buffer,
     contentType: String,
     position: {}, // to be determined
-    owner: String, // create a token between user and image
+    owner: {type: Schema.ObjectId, ref: "Image", index: true},
     score: Number // to be determined
+});
+
+var UserSchema = mongoose.Schema({
+    image: {type: Schema.ObjectId, ref: "User", index: true}
 });
 
 // Mongoose Model definition
 var Image = mongoose.model('images', ImageSchema);
+var User = mongoose.model('users', UserSchema);
 
 
 // Socket connection
@@ -57,7 +64,7 @@ app.get('/', function (req, res) {
             });
             console.log(docs);
         } else {
-            docs = {};
+            var docs = {};
             throw err;
         }
         res.render('index', {title: 'home', message: 'Image Wall', images: docs});
@@ -65,6 +72,23 @@ app.get('/', function (req, res) {
 });
 
 app.get('/add', function (req, res) {
+    var image,user;
+    User.findById(req.cookies.user, function (err, user) {
+        console.log(user);
+        console.log(err);
+        if (!err) {
+            Image.findById(user.image, function (err, img) {
+                image = img;
+            });
+        } else {
+            user = new User;
+            user.save(function (err, user) {
+                res.cookie('user', user._id, {httpOnly: true});
+            });
+            image = {};
+        }
+    });
+    console.log("Cookies: ", req.cookies.user);
     res.render('addImage', {title: 'add', message: 'add an image'});
 });
 
