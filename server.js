@@ -86,8 +86,11 @@ app.get('/add', function (req, res) {
                 if (err) throw err;
                 if (img) {
                     imageData = img.data.toString('base64');
+                    res.render('addImage', {title: 'add', message: 'add an image', image: imageData});
+                }else{
+                    res.render('addImage', {title: 'add', message: 'add an image'});
+
                 }
-                res.render('addImage', {title: 'add', message: 'add an image', image: imageData});
 
             });
         } else {
@@ -96,7 +99,7 @@ app.get('/add', function (req, res) {
                 if (err) throw err;
                 console.log("new user: " + user);
                 res.cookie('user', user._id, {httpOnly: false});
-                res.render('addImage', {title: 'add', message: 'add an image', image: imageData});
+                res.render('addImage', {title: 'add', message: 'add an image'});
             });
         }
         //console.log("Cookies: ", req.cookies.user);
@@ -115,8 +118,8 @@ app.post('/upload', function (req, res) {
                 console.error('image saved to mongo');
                 io.emit('imageAdded', {image: image.data.toString('base64'), client: req.cookies.user});
                 res.contentType(image.contentType);
-                console.log("less new image: "+image);
-                res.send(image);
+                //console.log("less new image: "+image);
+                res.send(image.data);
             });
         } else {
             var image = new Image;
@@ -128,8 +131,8 @@ app.post('/upload', function (req, res) {
                 console.error('image saved to mongo');
                 io.emit('imageAdded', {image: image.data.toString('base64'), client: req.cookies.user});
                 res.contentType(image.contentType);
-                console.log("new image: "+image);
-                res.send(image);
+                //console.log("new image: "+image.data);
+                res.send(image.data);
             });
         }
     });

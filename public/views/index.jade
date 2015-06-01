@@ -18,13 +18,12 @@ html
             console.log(data);
             if (data.image) {
                 console.log(" image: from client side");
-                console.log(data.image);
-                console.log(data.client);
-                if ($('.imageWall img[data-client="' + data.client + '"]')) {
+                console.log($('.imageWall img[data-client="' + data.client + '"]'));
+                if ($('.imageWall img[data-client="' + data.client + '"]').length ==0)  {
+                    $('.imageWall').append('<img data-client="'+data.client+'" src="data:image/jpeg;base64,' + data.image + '">')
+                } else {
                     console.log('in');
                     $('.imageWall img[data-client="' + data.client + '"]').attr('src', "data:image/jpeg;base64," + data.image)
-                } else {
-                    $('.imageWall').append('<img data-client="'+data.client+'" src="data:image/jpeg;base64,' + data.image + '">')
 
                 }
             }
