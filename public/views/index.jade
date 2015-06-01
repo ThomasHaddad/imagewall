@@ -9,7 +9,7 @@ html
         a(href='add') add an image
         div.imageWall
             - each image in images
-                img(data-client="#{image.owner}" , src='data:image/jpeg;base64,' + image.data )
+                img(data-client="#{image.owner}" , src="#{image.data}" )
 
     script(src="/socket.io/socket.io.js")
     script.
@@ -20,10 +20,10 @@ html
                 console.log(" image: from client side");
                 console.log($('.imageWall img[data-client="' + data.client + '"]'));
                 if ($('.imageWall img[data-client="' + data.client + '"]').length ==0)  {
-                    $('.imageWall').append('<img data-client="'+data.client+'" src="data:image/jpeg;base64,' + data.image + '">')
+                    $('.imageWall').append('<img data-client="'+data.client+'" src=' + data.image + '">')
                 } else {
                     console.log('in');
-                    $('.imageWall img[data-client="' + data.client + '"]').attr('src', "data:image/jpeg;base64," + data.image)
+                    $('.imageWall img[data-client="' + data.client + '"]').attr('src', data.image)
 
                 }
             }

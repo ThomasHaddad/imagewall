@@ -11,36 +11,18 @@ var path = require('path');
 var multer = require('multer');
 var _ = require('lodash');
 var cookieParser = require('cookie-parser');
-var dir = "./public/uploads/originals/";
+var originalDir ='./uploads/originals/';
 
 //Configuring modules
 
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/public/views');
 //app.use(bodyParser({uploadDir: '/tmp'}));
-app.use(multer({uploadDir: '/tmp'}));
+app.use(multer({dest: originalDir}));
+
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
-app.use(multer({
-    dest: './public/uploads/originals',
-    limits: {
-        fieldSize: 999999999
-
-    },
-    onFileUploadStart : function(file){
-        console.log('File recieved:');
-        console.log(file);
-    },
-    onFileUploadData:function (file,data){
-        console.log('Data recieved');
-    },
-    onParseEnd: function(req,next){
-        next();
-    },
-    onFileSizeLimit: function (file) {
-        console.log('Failed: ', file.originalname);
-    }
-}));
 // database connection
 mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
     if (error) {
@@ -49,7 +31,7 @@ mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
 });
 var Schema = mongoose.Schema;
 var ImageSchema = new Schema({
-    data: Buffer,
+    data: String,
     contentType: String,
     position: {}, // to be determined
     owner: {type: Schema.ObjectId, ref: "User", index: true},
@@ -79,10 +61,10 @@ io.on('connection', function (socket) {
 app.get('/', function (req, res) {
     Image.find({}, function (err, docs) {
         if (!err) {
-            _.each(docs, function (doc, key) {
-                doc.data = new Buffer(doc.data).toString('base64');
-                doc.owner = parseInt(doc.owner.toString())
-            });
+            //_.each(docs, function (doc, key) {
+            //    doc.data = new Buffer(doc.data).toString('base64');
+            //    doc.owner = parseInt(doc.owner.toString())
+            //});
             console.log(docs);
         } else {
             var docs = {};
@@ -126,9 +108,9 @@ app.get('/add', function (req, res) {
     });
 });
 
-app.post('/upload', [multer({dest: dir}), function (req, res) {
+app.post('/upload', function (req, res) {
     var tempPath = req.files.image.path;
-    var targetPath = dir + req.files.image.name;
+    var targetPath = originalDir + req.files.image.name;
     console.log("req files :"+req.files.image);
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
@@ -144,8 +126,9 @@ app.post('/upload', [multer({dest: dir}), function (req, res) {
                     };
                 });
             });
-            img.data = fs.readFileSync(tempPath);
+            img.data = targetPath;
             img.contentType = req.files.image.mimetype;
+            console.log(targetPath);
             img.save(function (err, image) {
                 if (err) throw err;
                 console.error('image saved to mongo');
@@ -156,7 +139,7 @@ app.post('/upload', [multer({dest: dir}), function (req, res) {
             });
         } else {
             fs.rename(tempPath, targetPath, function(err) {
-                if (err) throw err;
+                //if (err) throw err;
                 fs.unlink(tempPath, function() {
                     if (err) {
                         throw err;
@@ -166,7 +149,8 @@ app.post('/upload', [multer({dest: dir}), function (req, res) {
                 });
             });
             var image = new Image;
-            image.data = fs.readFileSync(tempPath);
+            console.log(targetPath);
+            image.data = targetPath;
             image.contentType = req.files.image.mimetype;
             image.owner = req.cookies.user;
             image.save(function (err, image) {
@@ -179,7 +163,7 @@ app.post('/upload', [multer({dest: dir}), function (req, res) {
             });
         }
     });
-}]);
+});
 
 app.get('/clear', function (req, res) {
     User.remove({}, function () {
