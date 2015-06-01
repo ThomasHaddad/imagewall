@@ -9,15 +9,23 @@ html
         a(href='add') add an image
         div.imageWall
             - each image in images
-                img(src='data:image/jpeg;base64,' + image.data)
+                img(data-client="#{image.owner}" , src='data:image/jpeg;base64,' + image.data )
 
     script(src="/socket.io/socket.io.js")
     script.
         var socket = io();
-        socket.on("imageAdded", function (image, buffer) {
-            if (image) {
+        socket.on("imageAdded", function (data, buffer) {
+            console.log(data);
+            if (data.image) {
                 console.log(" image: from client side");
-                console.log(image);
-                $('.imageWall').append('<img src="data:image/jpeg;base64,'+ image+'">')
+                console.log(data.image);
+                console.log(data.client);
+                if ($('.imageWall img[data-client="' + data.client + '"]')) {
+                    console.log('in');
+                    $('.imageWall img[data-client="' + data.client + '"]').attr('src', "data:image/jpeg;base64," + data.image)
+                } else {
+                    $('.imageWall').append('<img data-client="'+data.client+'" src="data:image/jpeg;base64,' + data.image + '">')
+
+                }
             }
         });

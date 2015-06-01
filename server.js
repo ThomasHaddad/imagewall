@@ -61,6 +61,7 @@ app.get('/', function (req, res) {
         if (!err) {
             _.each(docs, function (doc, key) {
                 doc.data = new Buffer(doc.data).toString('base64');
+                doc.owner = parseInt(doc.owner.toString())
             });
             console.log(docs);
         } else {
@@ -112,7 +113,7 @@ app.post('/upload', function (req, res) {
             img.save(function (err, image) {
                 if (err) throw err;
                 console.error('image saved to mongo');
-                io.emit('imageAdded', image.data.toString('base64'));
+                io.emit('imageAdded', {image: image.data.toString('base64'), client: req.cookies.user});
                 res.contentType(image.contentType);
                 console.log("less new image: "+image);
                 res.send(image);
@@ -125,14 +126,13 @@ app.post('/upload', function (req, res) {
             image.save(function (err, image) {
                 if (err) throw err;
                 console.error('image saved to mongo');
-                io.emit('imageAdded', image.data.toString('base64'));
+                io.emit('imageAdded', {image: image.data.toString('base64'), client: req.cookies.user});
                 res.contentType(image.contentType);
                 console.log("new image: "+image);
                 res.send(image);
             });
         }
     });
-    return false;
 });
 
 app.get('/clear', function (req, res) {
