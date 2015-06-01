@@ -11,6 +11,7 @@ var path = require('path');
 var multer = require('multer');
 var _ = require('lodash');
 var cookieParser = require('cookie-parser');
+var dir = "./public/uploads/originals/";
 
 //Configuring modules
 
@@ -20,7 +21,26 @@ app.set('views', __dirname + '/public/views');
 app.use(multer({uploadDir: '/tmp'}));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
+app.use(multer({
+    dest: './public/uploads/originals',
+    limits: {
+        fieldSize: 999999999
 
+    },
+    onFileUploadStart : function(file){
+        console.log('File recieved:');
+        console.log(file);
+    },
+    onFileUploadData:function (file,data){
+        console.log('Data recieved');
+    },
+    onParseEnd: function(req,next){
+        next();
+    },
+    onFileSizeLimit: function (file) {
+        console.log('Failed: ', file.originalname);
+    }
+}));
 // database connection
 mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
     if (error) {
@@ -87,7 +107,7 @@ app.get('/add', function (req, res) {
                 if (img) {
                     imageData = img.data.toString('base64');
                     res.render('addImage', {title: 'add', message: 'add an image', image: imageData});
-                }else{
+                } else {
                     res.render('addImage', {title: 'add', message: 'add an image'});
 
                 }
@@ -106,11 +126,24 @@ app.get('/add', function (req, res) {
     });
 });
 
-app.post('/upload', function (req, res) {
+app.post('/upload', [multer({dest: dir}), function (req, res) {
     var tempPath = req.files.image.path;
+    var targetPath = dir + req.files.image.name;
+    console.log("req files :"+req.files.image);
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
+            fs.rename(tempPath, targetPath, function(err) {
+                if (err) throw err;
+                // delete the temporary file
+                fs.unlink(tempPath, function() {
+                    if (err) {
+                        throw err;
+                    }else{
+                        //response logic ...
+                    };
+                });
+            });
             img.data = fs.readFileSync(tempPath);
             img.contentType = req.files.image.mimetype;
             img.save(function (err, image) {
@@ -122,6 +155,16 @@ app.post('/upload', function (req, res) {
                 res.send(image.data);
             });
         } else {
+            fs.rename(tempPath, targetPath, function(err) {
+                if (err) throw err;
+                fs.unlink(tempPath, function() {
+                    if (err) {
+                        throw err;
+                    }else{
+                        //response logic ...
+                    };
+                });
+            });
             var image = new Image;
             image.data = fs.readFileSync(tempPath);
             image.contentType = req.files.image.mimetype;
@@ -136,7 +179,7 @@ app.post('/upload', function (req, res) {
             });
         }
     });
-});
+}]);
 
 app.get('/clear', function (req, res) {
     User.remove({}, function () {
