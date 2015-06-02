@@ -2,16 +2,16 @@ html
     head
         title  ImageWall |
             != title
+        script(src="/js/jquery.js")
         link(rel='stylesheet', href='/css/styles.css')
     body
         h1!= message
 
         form(action="/upload", method="post", enctype="multipart/form-data")
             input(type="file", name="image")
-            input(type="submit", value="submit")
+            input(type="submit", value="submit",id="submit")
             if(image)
-                img(src='data:image/jpeg;base64,' + image)
+                img(src=image)
     script(src="/socket.io/socket.io.js")
     script.
         var socket = io();
-
