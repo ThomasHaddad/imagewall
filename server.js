@@ -151,7 +151,7 @@ app.post('/upload', function (req, res) {
 
                 image.save(function (err, image) {
                     if (err) throw err;
-                    console.error('image saved to mongo');
+                    console.log('image saved to mongo');
                     io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
                     res.contentType(image.contentType);
                     res.redirect("/add");
