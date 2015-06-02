@@ -172,6 +172,16 @@ app.post('/upload', function (req, res) {
 });
 
 app.get('/clear', function (req, res) {
+    fs.readdir(dirPath,function(err,files){
+        if (err) throw err;
+        files.forEach(function(file){
+            console.log(file);
+            fs.unlink(dirPath+file,function(){
+                if (err) throw err;
+                console.log('file sucessfully deleted');
+            });
+        })
+    });
     User.remove({}, function () {
         Image.remove({}, function () {
             res.clearCookie('user');
