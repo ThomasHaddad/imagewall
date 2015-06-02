@@ -13,11 +13,13 @@ var _ = require('lodash');
 var cookieParser = require('cookie-parser');
 var gd = require('node-gd');
 var dirPath = './public/uploads/';
+
+
 //Configuring modules
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/public/views');
+app.use(multer({dest: './uploads/'}));
 //app.use(bodyParser({uploadDir: '/tmp'}));
-app.use(multer({ dest: './uploads/'}))
 
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -32,7 +34,7 @@ var Schema = mongoose.Schema;
 var ImageSchema = new Schema({
     name: String,
     rawUrl: String,
-    formatedUrl:String,
+    formatedUrl: String,
     filteredUrl: String,
     contentType: String,
     position: {}, // to be determined
@@ -65,7 +67,6 @@ app.get('/', function (req, res) {
         if (!err) {
         } else {
             var docs = {};
-            throw err;
         }
         res.render('index', {title: 'home', message: 'Image Wall', images: docs});
     });
@@ -83,6 +84,7 @@ app.get('/add', function (req, res) {
             Image.findOne({owner: user._id}, function (err, img) {
                 console.log("User image : " + img);
                 if (err) throw err;
+
                 if (img) {
                     imageData = img.rawUrl;
                     res.render('addImage', {title: 'add', message: 'add an image', image: imageData});
@@ -105,83 +107,75 @@ app.get('/add', function (req, res) {
 });
 
 app.post('/upload', function (req, res) {
-    var baseUrl = req.protocol + '://'+ req.get('host');
-    var absolutePath = baseUrl +"/uploads/"+ req.files.image.name;
+    var baseUrl = req.protocol + '://' + req.get('host');
+    var absolutePath = baseUrl + "/uploads/" + req.files.image.name;
     var tempPath = req.files.image.path;
-    var targetPath = dirPath+req.files.image.name;
-    console.log("req files :"+req.files.image);
+    var targetPath = dirPath + req.files.image.name;
+
+    console.log("req files :" + req.files.image.name);
+
+
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
-            fs.rename(tempPath, targetPath, function(err) {
+            fs.rename(tempPath, targetPath, function (err) {
                 if (err) throw err;
-                // delete the temporary file
-                fs.unlink(tempPath, function() {
-                    if (err) {
-                        throw err;
-                    }else{
-                        //response logic ...
-                    };
-                });
-            });
-            fs.unlink(dirPath + img.name, function (err) {
-                if (err) throw err;
-                img.rawUrl = absolutePath;
-                img.name= req.files.image.name;
-                img.contentType = req.files.image.mimetype;
-                console.log(targetPath);
-                img.save(function (err, image) {
+                fs.unlink(dirPath + img.name, function (err) {
                     if (err) throw err;
-                    console.error('image saved to mongo');
-                    io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
-                    res.contentType(image.contentType);
-                    //console.log("less new image: "+image);
-                    res.send(image.data);
+
+                    img.rawUrl = absolutePath;
+                    img.name = req.files.image.name;
+                    img.contentType = req.files.image.mimetype;
+                    console.log(targetPath);
+
+                    img.save(function (err, image) {
+                        if (err) throw err;
+                        console.error('image saved to mongo');
+                        io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
+                        res.contentType(image.contentType);
+                        res.redirect("/add");
+                    });
+
                 });
             });
         } else {
-            fs.rename(tempPath, targetPath, function(err) {
+            fs.rename(tempPath, targetPath, function (err) {
                 if (err) throw err;
-                fs.unlink(tempPath, function() {
-                    if (err) {
-                        throw err;
-                    }else{
-                        //response logic ...
-                    };
-                });
-            });
-            var image = new Image;
-            console.log(targetPath);
-            image.rawUrl = absolutePath;
 
-                image.name= req.files.image.name;
-
+                var image = new Image;
+                console.log(targetPath);
+                image.rawUrl = absolutePath;
+                image.name = req.files.image.name;
                 image.contentType = req.files.image.mimetype;
                 image.owner = req.cookies.user;
+
                 image.save(function (err, image) {
                     if (err) throw err;
                     console.error('image saved to mongo');
                     io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
                     res.contentType(image.contentType);
-                    //console.log("new image: "+image.data);
-                    res.send(image.data);
+                    res.redirect("/add");
                 });
 
+            });
         }
     });
 });
 
 app.get('/clear', function (req, res) {
-    fs.readdir(dirPath,function(err,files){
+    // Delete all the uploaded files
+    fs.readdir(dirPath, function (err, files) {
         if (err) throw err;
-        files.forEach(function(file){
+        files.forEach(function (file) {
             console.log(file);
-            fs.unlink(dirPath+file,function(){
+            fs.unlink(dirPath + file, function () {
                 if (err) throw err;
                 console.log('file sucessfully deleted');
             });
         })
     });
+
+    // clears database
     User.remove({}, function () {
         Image.remove({}, function () {
             res.clearCookie('user');
