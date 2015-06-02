@@ -11,16 +11,17 @@ var path = require('path');
 var multer = require('multer');
 var _ = require('lodash');
 var cookieParser = require('cookie-parser');
-
+var gd = require('node-gd');
+var dirPath = './public/uploads/';
 //Configuring modules
-
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/public/views');
 //app.use(bodyParser({uploadDir: '/tmp'}));
-app.use(multer({uploadDir: '/tmp'}));
+app.use(multer({ dest: './uploads/'}))
+
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
-
 // database connection
 mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
     if (error) {
@@ -29,7 +30,10 @@ mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
 });
 var Schema = mongoose.Schema;
 var ImageSchema = new Schema({
-    data: Buffer,
+    name: String,
+    rawUrl: String,
+    formatedUrl:String,
+    filteredUrl: String,
     contentType: String,
     position: {}, // to be determined
     owner: {type: Schema.ObjectId, ref: "User", index: true},
@@ -59,11 +63,6 @@ io.on('connection', function (socket) {
 app.get('/', function (req, res) {
     Image.find({}, function (err, docs) {
         if (!err) {
-            _.each(docs, function (doc, key) {
-                doc.data = new Buffer(doc.data).toString('base64');
-                doc.owner = parseInt(doc.owner.toString())
-            });
-            console.log(docs);
         } else {
             var docs = {};
             throw err;
@@ -85,9 +84,9 @@ app.get('/add', function (req, res) {
                 console.log("User image : " + img);
                 if (err) throw err;
                 if (img) {
-                    imageData = img.data.toString('base64');
+                    imageData = img.rawUrl;
                     res.render('addImage', {title: 'add', message: 'add an image', image: imageData});
-                }else{
+                } else {
                     res.render('addImage', {title: 'add', message: 'add an image'});
 
                 }
@@ -102,38 +101,72 @@ app.get('/add', function (req, res) {
                 res.render('addImage', {title: 'add', message: 'add an image'});
             });
         }
-        //console.log("Cookies: ", req.cookies.user);
     });
 });
 
 app.post('/upload', function (req, res) {
+    var baseUrl = req.protocol + '://'+ req.get('host');
+    var absolutePath = baseUrl +"/uploads/"+ req.files.image.name;
     var tempPath = req.files.image.path;
+    var targetPath = dirPath+req.files.image.name;
+    console.log("req files :"+req.files.image);
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
-            img.data = fs.readFileSync(tempPath);
-            img.contentType = req.files.image.mimetype;
-            img.save(function (err, image) {
+            fs.rename(tempPath, targetPath, function(err) {
                 if (err) throw err;
-                console.error('image saved to mongo');
-                io.emit('imageAdded', {image: image.data.toString('base64'), client: req.cookies.user});
-                res.contentType(image.contentType);
-                //console.log("less new image: "+image);
-                res.send(image.data);
+                // delete the temporary file
+                fs.unlink(tempPath, function() {
+                    if (err) {
+                        throw err;
+                    }else{
+                        //response logic ...
+                    };
+                });
+            });
+            fs.unlink(dirPath + img.name, function (err) {
+                if (err) throw err;
+                img.rawUrl = absolutePath;
+                img.name= req.files.image.name;
+                img.contentType = req.files.image.mimetype;
+                console.log(targetPath);
+                img.save(function (err, image) {
+                    if (err) throw err;
+                    console.error('image saved to mongo');
+                    io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
+                    res.contentType(image.contentType);
+                    //console.log("less new image: "+image);
+                    res.send(image.data);
+                });
             });
         } else {
-            var image = new Image;
-            image.data = fs.readFileSync(tempPath);
-            image.contentType = req.files.image.mimetype;
-            image.owner = req.cookies.user;
-            image.save(function (err, image) {
+            fs.rename(tempPath, targetPath, function(err) {
                 if (err) throw err;
-                console.error('image saved to mongo');
-                io.emit('imageAdded', {image: image.data.toString('base64'), client: req.cookies.user});
-                res.contentType(image.contentType);
-                //console.log("new image: "+image.data);
-                res.send(image.data);
+                fs.unlink(tempPath, function() {
+                    if (err) {
+                        throw err;
+                    }else{
+                        //response logic ...
+                    };
+                });
             });
+            var image = new Image;
+            console.log(targetPath);
+            image.rawUrl = absolutePath;
+
+                image.name= req.files.image.name;
+
+                image.contentType = req.files.image.mimetype;
+                image.owner = req.cookies.user;
+                image.save(function (err, image) {
+                    if (err) throw err;
+                    console.error('image saved to mongo');
+                    io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
+                    res.contentType(image.contentType);
+                    //console.log("new image: "+image.data);
+                    res.send(image.data);
+                });
+
         }
     });
 });
