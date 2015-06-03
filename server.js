@@ -12,6 +12,7 @@ var multer = require('multer');
 var _ = require('lodash');
 var cookieParser = require('cookie-parser');
 var gd = require('node-gd');
+var async = require('async');
 var dirPath = './public/uploads/';
 
 
@@ -105,59 +106,110 @@ app.get('/add', function (req, res) {
         }
     });
 });
+function getRawPath(dirPath,name){
+    return dirPath+name.split('.')[0]+'-r.'+name.split('.')[1];
+}
+function getFormatedPath(dirPath,name){
+    return dirPath+name.split('.')[0]+'-f.'+name.split('.')[1];
+}
+
+function setRawUrl(baseUrl,name){
+    return baseUrl+ "/uploads/" +name.split('.')[0]+'-r.'+name.split('.')[1];
+}
+function setFormatedUrl(baseUrl,name){
+    return baseUrl+ "/uploads/" +name.split('.')[0]+'-f.'+name.split('.')[1];
+}
 
 app.post('/upload', function (req, res) {
+    var imageSize = {
+        width: 200,
+        height: 150
+    };
     var baseUrl = req.protocol + '://' + req.get('host');
-    var absolutePath = baseUrl + "/uploads/" + req.files.image.name;
     var tempPath = req.files.image.path;
-    var targetPath = dirPath + req.files.image.name;
-
-    console.log("req files :" + req.files.image.name);
 
 
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
-            fs.rename(tempPath, targetPath, function (err) {
+            fs.readFile(tempPath , function(err, data) {
                 if (err) throw err;
-                fs.unlink(dirPath + img.name, function (err) {
-                    if (err) throw err;
-
-                    img.rawUrl = absolutePath;
+                async.parallel([
+                    // RAW IMAGE
+                    function (callback) {
+                        fs.writeFile(getRawPath(dirPath,req.files.image.name), data, function (err) {
+                            if (err) throw err;
+                            fs.unlink(getRawPath(dirPath, img.name), function (err) {
+                                if (err) throw err;
+                                callback(err, data);
+                            });
+                        });
+                    },
+                    // FORMATED IMAGE
+                    function (callback) {
+                        fs.writeFile(getFormatedPath(dirPath,req.files.image.name), data, function (err) {
+                            if (err) throw err;
+                            fs.unlink(getFormatedPath(dirPath, img.name), function (err) {
+                                if (err) throw err;
+                                callback(err, data);
+                            });
+                        });
+                    }
+                ], function (data) {
                     img.name = req.files.image.name;
                     img.contentType = req.files.image.mimetype;
-                    console.log(targetPath);
+                    img.rawUrl = setRawUrl(baseUrl, img.name);
+                    img.formatedUrl = setFormatedUrl(baseUrl, img.name);
 
                     img.save(function (err, image) {
                         if (err) throw err;
-                        console.error('image saved to mongo');
                         io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
                         res.contentType(image.contentType);
                         res.redirect("/add");
                     });
-
-                });
+                })
             });
         } else {
-            fs.rename(tempPath, targetPath, function (err) {
+            fs.readFile(tempPath , function(err, data) {
                 if (err) throw err;
+                async.parallel([
+                    function (callback) {
+                        fs.writeFile(getRawPath(dirPath,req.files.image.name), data, function (err) {
+                            if (err) throw err;
+                            console.log("raw image saved for first time")
+                            callback(err, data);
+                        });
+                    },
+                    function (callback) {
+                        fs.writeFile(getFormatedPath(dirPath,req.files.image.name), data, function (err) {
+                            if (err) throw err;
+                            console.log("formated image saved for first time")
+                            callback(err, data);
+                        });
+                    }
+                ], function (data) {
+                    console.log('callback async');
+                    fs.unlink(tempPath,function(err){
+                        if (err) throw err;
+                        var image = new Image;
+                        image.name = req.files.image.name;
+                        image.rawUrl = setRawUrl(baseUrl, image.name);
+                        image.formatedUrl = setFormatedUrl(baseUrl, image.name);
+                        image.contentType = req.files.image.mimetype;
+                        image.owner = req.cookies.user;
 
-                var image = new Image;
-                console.log(targetPath);
-                image.rawUrl = absolutePath;
-                image.name = req.files.image.name;
-                image.contentType = req.files.image.mimetype;
-                image.owner = req.cookies.user;
 
-                image.save(function (err, image) {
-                    if (err) throw err;
-                    console.log('image saved to mongo');
-                    io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
-                    res.contentType(image.contentType);
-                    res.redirect("/add");
+                        image.save(function (err, image) {
+                            if (err) throw err;
+                            io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
+                            res.contentType(image.contentType);
+                            res.redirect("/add");
+                        });
+
+                    });
                 });
-
             });
+
         }
     });
 });
@@ -167,7 +219,6 @@ app.get('/clear', function (req, res) {
     fs.readdir(dirPath, function (err, files) {
         if (err) throw err;
         files.forEach(function (file) {
-            console.log(file);
             fs.unlink(dirPath + file, function () {
                 if (err) throw err;
                 console.log('file sucessfully deleted');
