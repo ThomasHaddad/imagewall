@@ -11,7 +11,6 @@ var path = require('path');
 var multer = require('multer');
 var _ = require('lodash');
 var cookieParser = require('cookie-parser');
-var gd = require('node-gd');
 var async = require('async');
 var dirPath = './public/uploads/';
 
@@ -132,7 +131,7 @@ app.post('/upload', function (req, res) {
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
-            fs.readFile(tempPath , function(err, data) {
+            fs.readFile(tempPath, function(err, data) {
                 if (err) throw err;
                 async.parallel([
                     // RAW IMAGE
@@ -147,7 +146,12 @@ app.post('/upload', function (req, res) {
                     },
                     // FORMATED IMAGE
                     function (callback) {
+
+                        // manip d'image
+
+
                         fs.writeFile(getFormatedPath(dirPath,req.files.image.name), data, function (err) {
+
                             if (err) throw err;
                             fs.unlink(getFormatedPath(dirPath, img.name), function (err) {
                                 if (err) throw err;
