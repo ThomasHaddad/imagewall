@@ -9,7 +9,10 @@ html
         a(href='add') add an image
         div.imageWall
             - each image in images
-                img(data-client="#{image.owner}" , src=image.rawUrl )
+                if(image.filteredUrl)
+                    img(data-client="#{image.owner}" , src=image.filteredUrl )
+                else
+                    img(data-client="#{image.owner}" , src=image.formatedUrl )
 
     script(src="/socket.io/socket.io.js")
     script.
@@ -27,5 +30,8 @@ html
 
                 }
             }
+        });
+        socket.on('imageFiltered',function(data){
+            $('.imageWall img[data-client="' + data.client + '"]').attr('src', data.image+'?i='+Date.now())
         });
 

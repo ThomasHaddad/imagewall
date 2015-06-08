@@ -13,12 +13,12 @@ html
         if(image)
             img(src=image)
 
-            button(data-eventType='filter' data-value="monochrome") Monochrome
-            button(data-eventType='filter' data-value="charcoal") Charcoal
-            button(data-eventType='filter' data-value="lowcolor") Lowcolor
-            button(data-eventType='filter' data-value="negative") Negative
-            button(data-eventType='filter' data-value="sepia") Sepia
-            button(data-eventType='filter' data-value="colorized") Colorized
+            button(data-eventType='filter' data-value="Monochrome") Monochrome
+            button(data-eventType='filter' data-value="Charcoal") Charcoal
+            button(data-eventType='filter' data-value="LowColor") Lowcolor
+            button(data-eventType='filter' data-value="Negative") Negative
+            button(data-eventType='filter' data-value="Sepia") Sepia
+            button(data-eventType='filter' data-value="Colorized") Colorized
     script(src="/socket.io/socket.io.js")
     script.
         var socket = io();
@@ -32,7 +32,7 @@ html
                     value:self.attr('data-value')
                 },
                 success: function (result) {
-                    alert("Your bookmark has been saved");
+                    $('img').attr('src',result+'?i='+Date.now());
                 }
             });
         });
