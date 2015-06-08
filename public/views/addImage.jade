@@ -10,8 +10,29 @@ html
         form(action="/upload", method="post", enctype="multipart/form-data")
             input(type="file", name="image")
             input(type="submit", value="submit",id="submit")
-            if(image)
-                img(src=image)
+        if(image)
+            img(src=image)
+
+            button(data-eventType='filter' data-value="monochrome") Monochrome
+            button(data-eventType='filter' data-value="charcoal") Charcoal
+            button(data-eventType='filter' data-value="lowcolor") Lowcolor
+            button(data-eventType='filter' data-value="negative") Negative
+            button(data-eventType='filter' data-value="sepia") Sepia
+            button(data-eventType='filter' data-value="colorized") Colorized
     script(src="/socket.io/socket.io.js")
     script.
         var socket = io();
+        $('button').on('click',function(){
+            var self = $(this);
+            $.ajax({
+                url: '/filterImage',
+                type: 'POST',
+                data: {
+                    eventType:self.attr('data-eventType'),
+                    value:self.attr('data-value')
+                },
+                success: function (result) {
+                    alert("Your bookmark has been saved");
+                }
+            });
+        });
