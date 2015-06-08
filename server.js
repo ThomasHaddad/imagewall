@@ -9,17 +9,16 @@ var fs = require('fs');
 var path = require('path');
 var bodyParser = require('body-parser');
 var multer = require('multer');
-var _ = require('lodash');
 var cookieParser = require('cookie-parser');
 var async = require('async');
 var dirPath = './public/uploads/';
 var i = require('./image_module');
 var imageManager = new i();
+var gm = require('gm').subClass({imageMagick: true});
+
+//configuring imageManager
 imageManager.dirPath = './public/uploads/';
 imageManager.expectedImageSize.ratio = imageManager.expectedImageSize.width / imageManager.expectedImageSize.height;
-
-
-var gm = require('gm').subClass({imageMagick: true});
 
 
 //Configuring modules
@@ -27,17 +26,18 @@ app.set('view engine', 'jade');
 app.set('views', __dirname + '/public/views');
 app.use(multer({dest: './uploads/'}));
 app.use(bodyParser.urlencoded());
-//app.use(bodyParser({uploadDir: '/tmp'}));
-
-
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
+
+
 // database connection
 mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
     if (error) {
         console.log(error);
     }
 });
+
+// Schemas Definitions
 var Schema = mongoose.Schema;
 var ImageSchema = new Schema({
     name: String,
@@ -119,6 +119,9 @@ app.get('/add', function (req, res) {
         }
     });
 });
+
+//externaliser ça
+
 function getRawName(name) {
     return name.split('.')[0] + '-r.' + name.split('.')[1];
 }
@@ -137,11 +140,15 @@ function setFormatedUrl(baseUrl, name) {
 function setFilteredUrl(baseUrl, name) {
     return baseUrl + "/uploads/" + name.split('.')[0] + '-m.' + name.split('.')[1];
 }
+
+
 app.post('/upload', function (req, res) {
     var baseUrl = req.protocol + '://' + req.get('host');
     var tempPath = req.files.image.path;
-
-
+    if(req.files.image.mimetype.indexOf('image')==-1){
+        res.json('Only images are accepted');
+        res.end();
+    }
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
@@ -153,10 +160,8 @@ app.post('/upload', function (req, res) {
 
                         gm(tempPath)
                             .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                console.log('raw ' + dirPath + getRawName(req.files.image.name));
                                 fs.unlink(dirPath + getRawName(img.name), function (err) {
                                     if (err) throw err;
-                                    console.log('new image raw created and old one deleted');
                                     callback(err, data);
                                 });
                             });
@@ -166,14 +171,11 @@ app.post('/upload', function (req, res) {
                     function (callback) {
                         // manip d'image
                         imageManager.getImageSize(tempPath, function () {
-                            console.log('tempPath : ' + tempPath);
                             imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
-                                console.log('newfilePath :' + newFilePath);
                                 imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function (newFilePath) {
                                     gm(newFilePath)
                                         .write(dirPath + getFormatedName(req.files.image.name), function (err) {
                                             fs.unlink(dirPath + getFormatedName(img.name), function (err) {
-                                                console.log('new image formated created and old one deleted')
                                                 callback(err, data);
                                             });
 
@@ -181,8 +183,6 @@ app.post('/upload', function (req, res) {
                                 });
                             });
                         });
-
-
                     }
                 ], function (data) {
                     fs.unlink(tempPath, function (err) {
@@ -195,7 +195,7 @@ app.post('/upload', function (req, res) {
 
                         img.save(function (err, image) {
                             if (err) throw err;
-                            io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
+                            io.emit('imageAdded', {image: image.formatedUrl, client: req.cookies.user});
                             res.contentType(image.contentType);
                             res.redirect("/add");
                         });
@@ -210,8 +210,6 @@ app.post('/upload', function (req, res) {
                     function (callback) {
                         gm(tempPath)
                             .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                console.log('new image raw created')
-
                                 callback(err, data);
                             });
 
@@ -221,9 +219,6 @@ app.post('/upload', function (req, res) {
                         imageManager.getImageSize(tempPath, function () {
                             imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
                                 imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
-                                    console.log('new image filtered created')
-
-
                                     callback(err, data);
                                 });
                             });
@@ -231,7 +226,6 @@ app.post('/upload', function (req, res) {
 
                     }
                 ], function (data) {
-                    console.log('callback async');
                     fs.unlink(tempPath, function (err) {
                         if (err) throw err;
                         var image = new Image;

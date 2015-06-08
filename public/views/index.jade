@@ -20,8 +20,6 @@ html
         socket.on("imageAdded", function (data, buffer) {
             console.log(data);
             if (data.image) {
-                console.log(" image: from client side");
-                console.log($('.imageWall img[data-client="' + data.client + '"]'));
                 if ($('.imageWall img[data-client="' + data.client + '"]').length ==0)  {
                     $('.imageWall').append('<img data-client="'+data.client+'" src=' + data.image + '>')
                 } else {
