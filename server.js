@@ -13,6 +13,13 @@ var _ = require('lodash');
 var cookieParser = require('cookie-parser');
 var async = require('async');
 var dirPath = './public/uploads/';
+var i = require('./image_module');
+var imageManager = new i();
+imageManager.dirPath = './public/uploads/';
+imageManager.expectedImageSize.ratio= imageManager.expectedImageSize.width/imageManager.expectedImageSize.height;
+
+
+var gm = require('gm').subClass({imageMagick: true});
 
 
 //Configuring modules
@@ -39,7 +46,9 @@ var ImageSchema = new Schema({
     contentType: String,
     position: {}, // to be determined
     owner: {type: Schema.ObjectId, ref: "User", index: true},
-    score: Number // to be determined
+    score: Number, // to be determined
+    character: String,
+    font: String
 });
 
 var UserSchema = mongoose.Schema({
@@ -105,25 +114,21 @@ app.get('/add', function (req, res) {
         }
     });
 });
-function getRawPath(dirPath,name){
-    return dirPath+name.split('.')[0]+'-r.'+name.split('.')[1];
+function getRawName(name) {
+    return name.split('.')[0] + '-r.' + name.split('.')[1];
 }
-function getFormatedPath(dirPath,name){
-    return dirPath+name.split('.')[0]+'-f.'+name.split('.')[1];
+function getFormatedName(name) {
+    return name.split('.')[0] + '-f.' + name.split('.')[1];
 }
 
-function setRawUrl(baseUrl,name){
-    return baseUrl+ "/uploads/" +name.split('.')[0]+'-r.'+name.split('.')[1];
+function setRawUrl(baseUrl, name) {
+    return baseUrl + "/uploads/" + name.split('.')[0] + '-r.' + name.split('.')[1];
 }
-function setFormatedUrl(baseUrl,name){
-    return baseUrl+ "/uploads/" +name.split('.')[0]+'-f.'+name.split('.')[1];
+function setFormatedUrl(baseUrl, name) {
+    return baseUrl + "/uploads/" + name.split('.')[0] + '-f.' + name.split('.')[1];
 }
 
 app.post('/upload', function (req, res) {
-    var imageSize = {
-        width: 200,
-        height: 150
-    };
     var baseUrl = req.protocol + '://' + req.get('host');
     var tempPath = req.files.image.path;
 
@@ -131,69 +136,94 @@ app.post('/upload', function (req, res) {
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
-            fs.readFile(tempPath, function(err, data) {
+            fs.readFile(tempPath, function (err, data) {
                 if (err) throw err;
                 async.parallel([
                     // RAW IMAGE
                     function (callback) {
-                        fs.writeFile(getRawPath(dirPath,req.files.image.name), data, function (err) {
-                            if (err) throw err;
-                            fs.unlink(getRawPath(dirPath, img.name), function (err) {
-                                if (err) throw err;
-                                callback(err, data);
+
+                        gm(tempPath)
+                            .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                console.log('raw '+dirPath + getRawName(req.files.image.name));
+                                fs.unlink(dirPath + getRawName(img.name), function (err) {
+                                    if (err) throw err;
+                                    console.log('new image raw created and old one deleted');
+                                    callback(err, data);
+                                });
                             });
-                        });
+
                     },
                     // FORMATED IMAGE
                     function (callback) {
-
                         // manip d'image
+                        imageManager.getImageSize(tempPath, function () {
+                            console.log('tempPath : ' +tempPath);
+                            imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
+                            console.log('newfilePath :' +newFilePath);
+                                imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function (newFilePath) {
+                                    gm(newFilePath)
+                                        .write(dirPath+getFormatedName(req.files.image.name),function(err){
+                                            fs.unlink(dirPath + getFormatedName(img.name), function (err) {
+                                                console.log('new image formated created and old one deleted')
+                                                callback(err, data);
+                                            });
 
-
-                        fs.writeFile(getFormatedPath(dirPath,req.files.image.name), data, function (err) {
-
-                            if (err) throw err;
-                            fs.unlink(getFormatedPath(dirPath, img.name), function (err) {
-                                if (err) throw err;
-                                callback(err, data);
+                                        })
+                                });
                             });
                         });
+
+
+
                     }
                 ], function (data) {
-                    img.name = req.files.image.name;
-                    img.contentType = req.files.image.mimetype;
-                    img.rawUrl = setRawUrl(baseUrl, img.name);
-                    img.formatedUrl = setFormatedUrl(baseUrl, img.name);
-
-                    img.save(function (err, image) {
+                    fs.unlink(tempPath, function (err) {
                         if (err) throw err;
-                        io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
-                        res.contentType(image.contentType);
-                        res.redirect("/add");
+                        img.name = req.files.image.name;
+                        img.contentType = req.files.image.mimetype;
+                        img.rawUrl = setRawUrl(baseUrl, img.name);
+                        img.formatedUrl = setFormatedUrl(baseUrl, img.name);
+
+                        img.save(function (err, image) {
+                            if (err) throw err;
+                            io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
+                            res.contentType(image.contentType);
+                            res.redirect("/add");
+                        });
                     });
+
                 })
             });
         } else {
-            fs.readFile(tempPath , function(err, data) {
+            fs.readFile(tempPath, function (err, data) {
                 if (err) throw err;
                 async.parallel([
                     function (callback) {
-                        fs.writeFile(getRawPath(dirPath,req.files.image.name), data, function (err) {
-                            if (err) throw err;
-                            console.log("raw image saved for first time")
-                            callback(err, data);
-                        });
+                        gm(tempPath)
+                            .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                console.log('new image raw created')
+
+                                callback(err, data);
+                            });
+
                     },
                     function (callback) {
-                        fs.writeFile(getFormatedPath(dirPath,req.files.image.name), data, function (err) {
-                            if (err) throw err;
-                            console.log("formated image saved for first time")
-                            callback(err, data);
+
+                        imageManager.getImageSize(tempPath, function () {
+                            imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
+                                imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
+                                    console.log('new image filtered created')
+
+
+                                    callback(err, data);
+                                });
+                            });
                         });
+
                     }
                 ], function (data) {
                     console.log('callback async');
-                    fs.unlink(tempPath,function(err){
+                    fs.unlink(tempPath, function (err) {
                         if (err) throw err;
                         var image = new Image;
                         image.name = req.files.image.name;
@@ -241,3 +271,6 @@ app.get('/clear', function (req, res) {
 http.listen(9000, function () {
     console.log('listening on *:9000');
 });
+/**
+ * Created by thomashaddad on 08/06/15.
+ */

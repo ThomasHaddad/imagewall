@@ -7,7 +7,6 @@ var http = require('http').Server(app);
 var fs = require('fs');
 var path = require('path');
 var gm = require('gm').subClass({imageMagick: true});
-
 //Configuring modules
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/public/views');
@@ -16,6 +15,7 @@ app.set('views', __dirname + '/public/views');
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+var dirPath = './public/uploadss/';
 var newImageSize;
 var cropValues={
     x:null,
@@ -31,17 +31,22 @@ var currentImageSize = {
     height: null,
     ratio: null
 };
-var filteredImagePath;
 
 app.get('/', function (req, res) {
-    var fileName = "beach.jpg";
-    var url = req.protocol + '://' + req.get('host') + "/uploads/";
-    var imagePath='./public/uploads/beach.jpg';
-    var cropImagePath='./public/uploads/beach-optimal.jpg';
+    var url = req.protocol + '://' + req.get('host') + "/uploadss/";
+    var fileName = "tesbeau.jpg";
+    var imagePath=dirPath+fileName;
+    var optimalImageName='tesbeau-optimal.jpg';
+    var filteredName = 'tesbeau-filtered.jpg';
     expectedImageSize.ratio = expectedImageSize.width / expectedImageSize.height;
     getImageSize(imagePath,function(){
-        cropImage(imagePath,function(cropImageName){
-            res.render('test', {original: url + fileName, optimal : url + cropImageName});
+        cropImage(imagePath,optimalImageName,function(newFilePath){
+            resizeImage(newFilePath,expectedImageSize,function(resizedFilePath){
+                setMonochromeImage(resizedFilePath,filteredName,function(){
+                    res.render('test', {original: url + fileName, optimal : url + optimalImageName,filtered:url+filteredName});
+
+                });
+            });
         });
     });
 
@@ -55,24 +60,34 @@ app.get('/', function (req, res) {
 function getImageSize(imagePath,callback){
     gm(imagePath)
         .size(function (err, data) {
-            console.log(data.width);
             currentImageSize.width = data.width;
             currentImageSize.height = data.height;
             currentImageSize.ratio = data.width / data.height;
-            console.log(currentImageSize);
             getNewValues(currentImageSize,expectedImageSize);
             getCropValues(currentImageSize,newImageSize);
-            callback(imagePath);
+            callback();
         });
 }
-function cropImage(imagePath,callback){
+function cropImage(imagePath,newFileName,callback){
+    var newFilePath=dirPath+newFileName;
     gm(imagePath)
         .crop(newImageSize.width,newImageSize.height, cropValues.x,cropValues.y)
-        .write('./public/uploads/beach-optimal.jpg', function (err) {
-            if (!err) console.log('Fuck this has arrived');
-            callback('beach-optimal.jpg');
+        .write(newFilePath, function (err) {
+            if(err) throw err;
+            callback(newFilePath);
         });
 }
+
+function resizeImage(fileName, expectedImagesize,callback){
+    gm(fileName)
+        .resize(expectedImagesize.width,expectedImagesize.height)
+        .write(fileName, function (err) {
+            if(err) throw err;
+            callback(fileName);
+        });
+}
+
+
 function getCropValues(currentImageInfo,newImageSize){
     cropValues.x= (currentImageInfo.width-newImageSize.width)/2;
     cropValues.y=(currentImageInfo.height-newImageSize.height)/2;
@@ -86,49 +101,44 @@ function getNewValues(currentProps,expectedProps){
     }
 }
 
-function setMonochromeImage(imagePath,callback){
+function setMonochromeImage(imagePath,filteredName,callback){
     gm(imagePath)
     .monochrome()
-    .write('./public/uploads/beach-sepia.jpg', function(err){
-        if (err) return console.dir(arguments)
-            //res.render('test', {original: url + fileName, optimal : url + "beach-sepia.jpg"});
-            callback("beach-sepia.jpg");
+    .write(dirPath+filteredName, function(err){
+        if (err) throw err;
+        callback()
     });
 }
-function setCharcoalImage(imagePath,callback){
+function setCharcoalImage(imagePath,filteredName,callback){
     gm(imagePath)
-    .charcoal(1.5)
-    .write('./public/uploads/beach-charcoal.jpg', function(err){
-        if (err) return console.dir(arguments)
-            //res.render('test', {original: url + fileName, optimal : url + "beach-charcoal.jpg"});
+    .charcoal(5)
+    .write(dirPath+filteredName, function(err){
+        if (err) throw err;
             callback()
     });
 }
-function setLowColorImage(imagePath,callback){
+function setLowColorImage(imagePath,filteredName,callback){
     gm(imagePath)
     .colors(8)
-    .write('./public/uploads/beach-colors.jpg', function(err){
-        if (err) return console.dir(arguments)
-            //res.render('test', {original: url + fileName, optimal : url + "beach-colors.jpg"});
-            callback()
+    .write(dirPath+filteredName, function(err){
+        if (err) throw err;
+        callback()
     });
 }
-function setNegativeImage(imagePath,callback){
+function setNegativeImage(imagePath,filteredName,callback){
     gm(imagePath)
     .negative()
-    .write('./public/uploads/beach-negative.jpg', function(err){
-        if (err) return console.dir(arguments)
-            //res.render('test', {original: url + fileName, optimal : url + "beach-negative.jpg"});
-            callback()
+    .write(dirPath+filteredName, function(err){
+        if (err) throw err;
+        callback()
     });
 }
-function SetSepiaImage(imagePath,callback){
+function setSepiaImage(imagePath,filteredName,callback){
     gm(imagePath)
     .sepia()
-    .write('./public/uploads/beach-sepia.jpg', function(err){
-        if (err) return console.dir(arguments)
-            //res.render('test', {original: url + fileName, optimal : url + "beach-sepia.jpg"});
-            callback()
+    .write(dirPath+filteredName, function(err){
+        if (err) throw err;
+        callback()
     });
 }
 
