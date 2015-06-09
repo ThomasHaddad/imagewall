@@ -28,10 +28,11 @@ app.use(multer({dest: './uploads/'}));
 app.use(bodyParser.urlencoded());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
-
+app.set('host', '167.114.240.87');
+app.set('port', 8080);
 
 // database connection
-mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
+mongoose.connect('mongodb://167.114.240.87:8080/imagewall', function (error) {
     if (error) {
         console.log(error);
     }
