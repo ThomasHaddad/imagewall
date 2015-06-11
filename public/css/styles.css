@@ -1,4 +1,20 @@
-img{
+#imageWall{
+    position: relative;
+}
+#imageWall img{
     width: 200px;
     height: 150px;
+    opacity: 0;
+    -webkit-transform: scale(0.4);
+    transform: scale(0.4);
+    -webkit-transition: all 1s ease-in-out;
+    transition: all 1s ease-in-out;
+    position: absolute;
 }
+
+#imageWall img.animate {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    opacity:1;
+}
+

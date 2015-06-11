@@ -7,29 +7,110 @@ html
     body
         h1!= message
         a(href='add') add an image
-        div.imageWall
+        div#imageWall
             - each image in images
                 if(image.filteredUrl)
                     img(data-client="#{image.owner}" , src=image.filteredUrl )
                 else
-                    img(data-client="#{image.owner}" , src=image.formatedUrl )
+                    img(data-client="#{image.owner}" , src=image.formatedUrl)
 
     script(src="/socket.io/socket.io.js")
     script.
-        var socket = io();
-        socket.on("imageAdded", function (data, buffer) {
-            console.log(data);
-            if (data.image) {
-                if ($('.imageWall img[data-client="' + data.client + '"]').length ==0)  {
-                    $('.imageWall').append('<img data-client="'+data.client+'" src=' + data.image + '>')
-                } else {
-                    console.log('in');
-                    $('.imageWall img[data-client="' + data.client + '"]').attr('src', data.image)
 
+        $(function () {
+
+            var x = 0,
+                y = 0,
+                delta = [0, -1],
+                width = 100,
+                height = 100;
+            var origin = {
+                left: $(document).width()/2-100,
+                top: $(document).height()/2-75
+            };
+            var images = !{JSON.stringify(images)}
+            var img;
+
+            $(window).load(function(){
+                if (images.length){
+                    for (var i = 0; i<Math.pow(Math.max(width, height),2); i++) {
+                        img = $('#imageWall img').eq(i);
+                        if ((-width/2 < x <= width/2)
+                            && (-height/2 < y <= height/2)) {
+                            if(img.length){
+
+                                img.css({
+                                    left:origin.left + x*200 +'px',
+                                    top:origin.top + y*150+'px'
+                                }).delay(100*i).queue(function(){
+                                  $(this).addClass('animate')
+                                })
+                            }else{
+                                break;
+                            }
+                        }
+
+                            if (x === y
+                                || (x < 0 && x === -y)
+                                || (x > 0 && x === 1-y)){
+                            // change direction
+                        delta = [-delta[1], delta[0]]
+                        }
+
+                        x += delta[0];
+                        console.log(x)
+                        y += delta[1];
+                        console.log(y)
+                    }
                 }
-            }
+            });
+            var socket = io();
+            socket.on("imageAdded", function (data, buffer) {
+                if (data.image) {
+                    if ($('#imageWall img[data-client="' + data.client + '"]').length == 0) {
+                        $('#imageWall').append('<img data-client="' + data.client + '" src=' + data.image + '> ')
+                        $('#imageWall img[data-client="' + data.client + '"]').load(function () {
+
+                            if ((-width/2 < x <= width/2)
+                                    && (-height/2 < y <= height/2)) {
+                                console.log(x);
+                                console.log(y);
+                                $(this).css({
+                                    left:origin.left + x*200 +'px',
+                                    top:origin.top + y*150+'px'
+                                });
+                                $(this).addClass('animate');
+                            }
+
+                            if (x === y
+                                    || (x < 0 && x === -y)
+                                    || (x > 0 && x === 1-y)){
+                                // change direction
+                                delta = [-delta[1], delta[0]]
+                            }
+
+                            x += delta[0];
+                            y += delta[1];
+
+                        })
+                    } else {
+                        $('#imageWall img[data-client="' + data.client + '"]').removeClass('animate')
+                        setTimeout(function () {
+                            $('#imageWall img[data-client="' + data.client + '"]').attr('src', data.image)
+                            $('#imageWall img[data-client="' + data.client + '"]').addClass('animate')
+                        }, 1000);
+
+                    }
+                }
+            });
+            socket.on('imageFiltered', function (data) {
+                $('#imageWall img[data-client="' + data.client + '"]').removeClass('animate')
+                setTimeout(function () {
+                    $('#imageWall img[data-client="' + data.client + '"]').attr('src', data.image + '?i=' + Date.now()).addClass('animate')
+                }, 1000);
+
+            });
         });
-        socket.on('imageFiltered',function(data){
-            $('.imageWall img[data-client="' + data.client + '"]').attr('src', data.image+'?i='+Date.now())
-        });
+
+
 

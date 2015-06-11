@@ -28,15 +28,25 @@ app.use(multer({dest: './uploads/'}));
 app.use(bodyParser.urlencoded());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
-app.set('host', '167.114.240.87');
-app.set('port', 8080);
+
 
 // database connection
-mongoose.connect('mongodb://167.114.240.87:8080/imagewall', function (error) {
+mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
     if (error) {
         console.log(error);
     }
 });
+// CONFIG PROD
+//app.set('host', '167.114.240.87');
+//app.set('port', 9000);
+//
+//// database connection
+//mongoose.connect('mongodb://167.114.240.87:8080/imagewall', function (error) {
+//    if (error) {
+//        console.log(error);
+//    }
+//});
+
 
 // Schemas Definitions
 var Schema = mongoose.Schema;
@@ -239,11 +249,10 @@ app.post('/upload', function (req, res) {
 
                         image.save(function (err, image) {
                             if (err) throw err;
-                            io.emit('imageAdded', {image: image.rawUrl, client: req.cookies.user});
+                            io.emit('imageAdded', {image: image.formatedUrl, client: req.cookies.user});
                             res.contentType(image.contentType);
                             res.redirect("/add");
                         });
-
                     });
                 });
             });
