@@ -16,7 +16,7 @@ html
 
     script(src="/socket.io/socket.io.js")
     script.
-
+        var socket = io();
         $(function () {
 
             var x = 0,
@@ -30,7 +30,6 @@ html
             };
             var images = !{JSON.stringify(images)}
             var img;
-
             $(window).load(function(){
                 if (images.length){
                     for (var i = 0; i<Math.pow(Math.max(width, height),2); i++) {
@@ -58,17 +57,15 @@ html
                         }
 
                         x += delta[0];
-                        console.log(x)
                         y += delta[1];
-                        console.log(y)
                     }
                 }
             });
-            var socket = io();
+
             socket.on("imageAdded", function (data, buffer) {
-                console.log('IMAGEADDED');
 
                 if (data.image) {
+
                     if ($('#imageWall img[data-client="' + data.client + '"]').length == 0) {
                         $('#imageWall').append('<img data-client="' + data.client + '" src=' + data.image + '> ')
                         $('#imageWall img[data-client="' + data.client + '"]').load(function () {
@@ -82,6 +79,7 @@ html
                                     top:origin.top + y*150+'px'
                                 });
                                 $(this).addClass('animate');
+                                $(this).unbind('load');
                             }
 
                             if (x === y
@@ -93,7 +91,6 @@ html
 
                             x += delta[0];
                             y += delta[1];
-
                         })
                     } else {
                         $('#imageWall img[data-client="' + data.client + '"]').removeClass('animate')
@@ -106,9 +103,9 @@ html
                 }
             });
             socket.on('imageFiltered', function (data) {
-                console.log('IMAGEFILTERED');
                 $('#imageWall img[data-client="' + data.client + '"]').removeClass('animate')
                 setTimeout(function () {
+
                     $('#imageWall img[data-client="' + data.client + '"]').attr('src', data.image + '?i=' + Date.now()).addClass('animate')
                 }, 1000);
 
