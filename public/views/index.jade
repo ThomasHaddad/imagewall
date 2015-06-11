@@ -66,6 +66,8 @@ html
             });
             var socket = io();
             socket.on("imageAdded", function (data, buffer) {
+                console.log('IMAGEADDED');
+
                 if (data.image) {
                     if ($('#imageWall img[data-client="' + data.client + '"]').length == 0) {
                         $('#imageWall').append('<img data-client="' + data.client + '" src=' + data.image + '> ')
@@ -104,6 +106,7 @@ html
                 }
             });
             socket.on('imageFiltered', function (data) {
+                console.log('IMAGEFILTERED');
                 $('#imageWall img[data-client="' + data.client + '"]').removeClass('animate')
                 setTimeout(function () {
                     $('#imageWall img[data-client="' + data.client + '"]').attr('src', data.image + '?i=' + Date.now()).addClass('animate')

@@ -41,7 +41,7 @@ mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
 //app.set('port', 9000);
 //
 //// database connection
-//mongoose.connect('mongodb://167.114.240.87:8080/imagewall', function (error) {
+//mongoose.connect('mongodb://127.0.0.1:27017/imagewall', function (error) {
 //    if (error) {
 //        console.log(error);
 //    }
@@ -316,8 +316,8 @@ app.get('/clear', function (req, res) {
         });
     });
 });
-http.listen(9000, function () {
-    console.log('listening on *:9000');
+http.listen(80, function () {
+    console.log('listening on *:80');
 });
 /**
  * Created by thomashaddad on 08/06/15.
