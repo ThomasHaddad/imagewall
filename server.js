@@ -57,14 +57,14 @@ var ImageSchema = new Schema({
     filteredUrl: String,
     contentType: String,
     position: {}, // to be determined
-    owner: {type: Schema.ObjectId, ref: "User", index: true},
+    owner: {type: Schema.ObjectId, ref: "User"},
     score: Number, // to be determined
     character: String,
     font: String
 });
 
 var UserSchema = mongoose.Schema({
-    image: {type: Schema.ObjectId, ref: "Image", index: true}
+    image: {type: Schema.ObjectId, ref: "Image"}
 });
 
 // Mongoose Model definition
