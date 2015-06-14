@@ -11,18 +11,32 @@ html
             input(type="file", name="image", accept="image/*")
             input(type="submit", value="submit",id="submit")
         if(image)
-            img(src=image)
-            select
-                option(value="Monochrome") Monochrome
-                option(value="Charcoal") Charcoal
-                option(value="LowColor") LowColor
-                option(value="Negative") Negative
-                option(value="Sepia") Sepia
-                option(value="Colorized") Colorized
-                option(value="Default" selected) Default
+            if(image.filteredUrl)
+                img(src=image.filteredUrl)
+            else
+                img(src=image.formatedUrl)
+
+        select
+            option(value="Monochrome") Monochrome
+            option(value="Charcoal") Charcoal
+            option(value="LowColor") LowColor
+            option(value="Negative") Negative
+            option(value="Sepia") Sepia
+            option(value="Colorized") Colorized
+            option(value="Default") Default
     script(src="/socket.io/socket.io.js")
     script.
         var socket = io();
+        var image = !{JSON.stringify(image)}
+
+        //select the good option on page load
+        if(image.filterType){
+            $('select').val(image.filterType).attr('selected','selected');
+        }else{
+            $('select').val('Default').attr('selected','selected')
+        }
+
+        //ajax on select
         $('select').on('change',function(){
             console.log($(this).val())
             var self = $(this);
@@ -32,8 +46,12 @@ html
                 data: {
                     value:self.val()
                 },
+                beforeSend:function(){
+                    $('select').hide();
+                },
                 success: function (result) {
                     $('img').attr('src',result+'?i='+Date.now());
+                    $('select').show();
                 }
             });
         });

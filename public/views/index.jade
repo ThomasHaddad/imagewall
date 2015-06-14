@@ -9,10 +9,11 @@ html
         a(href='add') add an image
         div#imageWall
             - each image in images
-                if(image.filteredUrl)
-                    img(data-client="#{image.owner}" , src=image.filteredUrl )
-                else
-                    img(data-client="#{image.owner}" , src=image.formatedUrl)
+                div.image(data-client="#{image.owner}")
+                    if(image.filteredUrl)
+                        img(src=image.filteredUrl )
+                    else
+                        img(src=image.formatedUrl)
 
     script(src="/socket.io/socket.io.js")
     script.
@@ -30,10 +31,13 @@ html
             };
             var images = !{JSON.stringify(images)}
             var img;
+            function placeTile(elt){
+
+            }
             $(window).load(function(){
                 if (images.length){
                     for (var i = 0; i<Math.pow(Math.max(width, height),2); i++) {
-                        img = $('#imageWall img').eq(i);
+                        img = $('#imageWall .image').eq(i);
                         if ((-width/2 < x <= width/2)
                             && (-height/2 < y <= height/2)) {
                             if(img.length){
@@ -66,14 +70,14 @@ html
 
                 if (data.image) {
 
-                    if ($('#imageWall img[data-client="' + data.client + '"]').length == 0) {
-                        $('#imageWall').append('<img data-client="' + data.client + '" src=' + data.image + '> ')
-                        $('#imageWall img[data-client="' + data.client + '"]').load(function () {
+                    if ($('#imageWall .image[data-client="' + data.client + '"]').length == 0) {
+                        $('#imageWall').append(
+                                '<div data-client="' + data.client + '"><img src=' + data.image + '> </div> '
+                        )
+                        $('#imageWall .image[data-client="' + data.client + '"]').load(function () {
 
                             if ((-width/2 < x <= width/2)
                                     && (-height/2 < y <= height/2)) {
-                                console.log(x);
-                                console.log(y);
                                 $(this).css({
                                     left:origin.left + x*200 +'px',
                                     top:origin.top + y*150+'px'
@@ -93,20 +97,21 @@ html
                             y += delta[1];
                         })
                     } else {
-                        $('#imageWall img[data-client="' + data.client + '"]').removeClass('animate')
+                        $('#imageWall .image[data-client="' + data.client + '"]').removeClass('animate')
                         setTimeout(function () {
-                            $('#imageWall img[data-client="' + data.client + '"]').attr('src', data.image)
-                            $('#imageWall img[data-client="' + data.client + '"]').addClass('animate')
+                            $('#imageWall .image[data-client="' + data.client + '"] img').attr('src', data.image)
+                            $('#imageWall .image[data-client="' + data.client + '"]').addClass('animate')
                         }, 1000);
 
                     }
                 }
             });
             socket.on('imageFiltered', function (data) {
-                $('#imageWall img[data-client="' + data.client + '"]').removeClass('animate')
+                $('#imageWall .image[data-client="' + data.client + '"]').removeClass('animate')
                 setTimeout(function () {
 
-                    $('#imageWall img[data-client="' + data.client + '"]').attr('src', data.image + '?i=' + Date.now()).addClass('animate')
+                    $('#imageWall .image[data-client="' + data.client + '"] img').attr('src', data.image + '?i=' + Date.now())
+                    $('#imageWall .image[data-client="' + data.client + '"]').addClass('animate');
                 }, 1000);
 
             });

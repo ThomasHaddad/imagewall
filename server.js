@@ -55,6 +55,7 @@ var ImageSchema = new Schema({
     rawUrl: String,
     formatedUrl: String,
     filteredUrl: String,
+    filterType: String,
     contentType: String,
     position: {}, // to be determined
     owner: {type: Schema.ObjectId, ref: "User"},
@@ -107,14 +108,9 @@ app.get('/add', function (req, res) {
                 if (err) throw err;
 
                 if (img) {
-                    if (img.filteredUrl) {
-                        imageData = img.filteredUrl;
-                    } else {
-                        imageData = img.formatedUrl;
-                    }
-                    res.render('addImage', {title: 'add', message: 'add an image', image: imageData});
+                    res.render('addImage', {title: 'add', message: 'Change your image', image: img});
                 } else {
-                    res.render('addImage', {title: 'add', message: 'add an image'});
+                    res.render('addImage', {title: 'add', message: 'Add an image'});
 
                 }
 
@@ -125,7 +121,7 @@ app.get('/add', function (req, res) {
                 if (err) throw err;
                 console.log("new user: " + user);
                 res.cookie('user', user._id, {httpOnly: false});
-                res.render('addImage', {title: 'add', message: 'add an image'});
+                res.render('addImage', {title: 'add', message: 'Add an image'});
             });
         }
     });
@@ -203,6 +199,7 @@ app.post('/upload', function (req, res) {
                         img.rawUrl = setRawUrl(baseUrl, img.name);
                         img.formatedUrl = setFormatedUrl(baseUrl, img.name);
                         img.filteredUrl = null;
+                        img.filterType=null;
 
                         img.save(function (err, image) {
                             if (err) throw err;
@@ -273,6 +270,7 @@ app.post('/filterImage', function (req, res) {
                     //fs.unlink(dirPath + getFilteredName(img.name), function (err) {
 
                     img.filteredUrl = setFilteredUrl(baseUrl, img.name);
+                    img.filterType=req.body.value;
                     img.save(function (err, image) {
                         if (err) throw err;
                         io.emit('imageFiltered', {image: image.filteredUrl, client: req.cookies.user});
@@ -283,6 +281,7 @@ app.post('/filterImage', function (req, res) {
             } else {
                 fs.unlink(dirPath + getFilteredName(img.name), function (err) {
                     img.filteredUrl = null;
+                    img.filterType=null;
                     img.save(function (err, image) {
                         if (err) throw err;
                         io.emit('imageFiltered', {image: image.formatedUrl, client: req.cookies.user});
