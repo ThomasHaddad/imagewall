@@ -156,7 +156,7 @@ function setFilteredUrl(baseUrl, name) {
 app.post('/upload', function (req, res) {
     var baseUrl = req.protocol + '://' + req.get('host');
     var tempPath = req.files.image.path;
-    if(req.files.image.mimetype.indexOf('image')==-1){
+    if (req.files.image.mimetype.indexOf('image') == -1) {
         res.json('Only images are accepted');
         res.end();
     }
@@ -266,31 +266,29 @@ app.post('/filterImage', function (req, res) {
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
-            if(req.body.eventType =="filter"){
 
-                if(req.body.value!='default'){
-                    imageManager['set' + req.body.value + 'Image'](dirPath + getFormatedName(img.name), getFilteredName(img.name), function (err, data) {
+            if (req.body.value != 'Default') {
+                imageManager['set' + req.body.value + 'Image'](dirPath + getFormatedName(img.name), getFilteredName(img.name), function (err, data) {
+                    if (err) throw err;
+                    //fs.unlink(dirPath + getFilteredName(img.name), function (err) {
+
+                    img.filteredUrl = setFilteredUrl(baseUrl, img.name);
+                    img.save(function (err, image) {
                         if (err) throw err;
-                        //fs.unlink(dirPath + getFilteredName(img.name), function (err) {
-
-                            img.filteredUrl = setFilteredUrl(baseUrl, img.name);
-                            img.save(function (err, image) {
-                                if (err) throw err;
-                                io.emit('imageFiltered', {image: image.filteredUrl, client: req.cookies.user});
-                                res.json(image.filteredUrl);
-                            })
-                        //})
-                    });
-                }else{
-                    fs.unlink(dirPath + getFilteredName(img.name),function(err){
-                        img.filteredUrl = null;
-                        img.save(function (err, image) {
-                            if (err) throw err;
-                            io.emit('imageFiltered', {image: image.formatedUrl, client: req.cookies.user});
-                            res.json(image.formatedUrl);
-                        })
-                    });
-                }
+                        io.emit('imageFiltered', {image: image.filteredUrl, client: req.cookies.user});
+                        res.json(image.filteredUrl);
+                    })
+                    //})
+                });
+            } else {
+                fs.unlink(dirPath + getFilteredName(img.name), function (err) {
+                    img.filteredUrl = null;
+                    img.save(function (err, image) {
+                        if (err) throw err;
+                        io.emit('imageFiltered', {image: image.formatedUrl, client: req.cookies.user});
+                        res.json(image.formatedUrl);
+                    })
+                });
             }
         }
     });
@@ -316,7 +314,7 @@ app.get('/clear', function (req, res) {
         });
     });
 });
-http.listen(80, function () {
+http.listen(9000, function () {
     console.log('listening on *:80');
 });
 /**

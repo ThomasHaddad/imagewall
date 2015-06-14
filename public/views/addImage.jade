@@ -12,25 +12,25 @@ html
             input(type="submit", value="submit",id="submit")
         if(image)
             img(src=image)
-
-            button(data-eventType='filter' data-value="Monochrome") Monochrome
-            button(data-eventType='filter' data-value="Charcoal") Charcoal
-            button(data-eventType='filter' data-value="LowColor") Lowcolor
-            button(data-eventType='filter' data-value="Negative") Negative
-            button(data-eventType='filter' data-value="Sepia") Sepia
-            button(data-eventType='filter' data-value="Colorized") Colorized
-            button(data-eventType='filter' data-value="default") Default
+            select
+                option(value="Monochrome") Monochrome
+                option(value="Charcoal") Charcoal
+                option(value="LowColor") LowColor
+                option(value="Negative") Negative
+                option(value="Sepia") Sepia
+                option(value="Colorized") Colorized
+                option(value="Default" selected) Default
     script(src="/socket.io/socket.io.js")
     script.
         var socket = io();
-        $('button').on('click',function(){
+        $('select').on('change',function(){
+            console.log($(this).val())
             var self = $(this);
             $.ajax({
                 url: '/filterImage',
                 type: 'POST',
                 data: {
-                    eventType:self.attr('data-eventType'),
-                    value:self.attr('data-value')
+                    value:self.val()
                 },
                 success: function (result) {
                     $('img').attr('src',result+'?i='+Date.now());
