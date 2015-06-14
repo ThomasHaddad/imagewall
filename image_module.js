@@ -21,21 +21,37 @@ module.exports = function () {
             height: null,
             ratio: null
         },
-        getImageSize: function (imagePath, callback) {
-            gm(imagePath)
-                .size(function (err, data) {
-                    self.currentImageSize.width = data.width;
-                    self.currentImageSize.height = data.height;
-                    self.currentImageSize.ratio = data.width / data.height;
-                    self.getNewValues(self.currentImageSize, self.expectedImageSize);
-                    self.getCropValues(self.currentImageSize, self.newImageSize);
-                    callback();
+        getImageSize: function (imagePath, thanksApple, callback) {
 
-                });
+            if (!thanksApple) {
+                gm(imagePath)
+                    .size(function (err, data) {
+
+                        console.log(data);
+                        self.currentImageSize.width = data.width;
+                        self.currentImageSize.height = data.height;
+                        self.currentImageSize.ratio = data.width / data.height;
+                        self.getNewValues(self.currentImageSize, self.expectedImageSize);
+                        self.getCropValues(self.currentImageSize, self.newImageSize);
+                        callback();
+                    });
+            }else{
+                gm(imagePath)
+                    .rotate("white",90)
+                    .size(function (err, data) {
+                        console.log(data);
+                        self.currentImageSize.width = data.height;
+                        self.currentImageSize.height = data.width;
+                        self.currentImageSize.ratio = data.width / data.height;
+                        self.getNewValues(self.currentImageSize, self.expectedImageSize);
+                        self.getCropValues(self.currentImageSize, self.newImageSize);
+                        callback();
+                    });
+            }
         },
         cropImage: function (imagePath, newFileName, callback) {
             var newFilePath = self.dirPath + newFileName;
-            console.log('future formated filename : ' + newFileName);
+            //console.log('future formated filename : ' + newFileName);
             gm(imagePath)
                 .crop(self.newImageSize.width, self.newImageSize.height, self.cropValues.x, self.cropValues.y)
                 .write(newFilePath, function (err) {
@@ -43,7 +59,17 @@ module.exports = function () {
                     callback(newFilePath);
                 });
         },
-
+        rotateAndCropImage: function (imagePath, newFileName, callback) {
+            var newFilePath = self.dirPath + newFileName;
+            //console.log('future formated filename : ' + newFileName);
+            gm(imagePath)
+                .rotate("white",90)
+                .crop(self.newImageSize.height, self.newImageSize.width, self.cropValues.y, self.cropValues.x)
+                .write(newFilePath, function (err) {
+                    if (err) throw err;
+                    callback(newFilePath);
+                });
+        },
         resizeImage: function (fileName, expectedImagesize, callback) {
             gm(fileName)
                 .resize(self.expectedImageSize.width, self.expectedImageSize.height)

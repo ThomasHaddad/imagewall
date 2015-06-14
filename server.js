@@ -99,12 +99,12 @@ app.get('/add', function (req, res) {
         user,
         newUser;
     User.findById(req.cookies.user, function (err, user) {
-        console.log("Current user: " + user);
+        //console.log("Current user: " + user);
         if (err) throw err;
         if (user) {
-            console.log(user._id);
+            //console.log(user._id);
             Image.findOne({owner: user._id}, function (err, img) {
-                console.log("User image : " + img);
+                //console.log("User image : " + img);
                 if (err) throw err;
 
                 if (img) {
@@ -119,7 +119,7 @@ app.get('/add', function (req, res) {
             newUser = new User;
             newUser.save(function (err, user) {
                 if (err) throw err;
-                console.log("new user: " + user);
+                //console.log("new user: " + user);
                 res.cookie('user', user._id, {httpOnly: false});
                 res.render('addImage', {title: 'add', message: 'Add an image'});
             });
@@ -213,24 +213,61 @@ app.post('/upload', function (req, res) {
             });
         } else {
             fs.readFile(tempPath, function (err, data) {
+
                 if (err) throw err;
                 async.parallel([
                     function (callback) {
                         gm(tempPath)
-                            .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                callback(err, data);
+                            .identify(function (err, data) {
+                                if(data.Properties['exif:Orientation']==6 && data.Properties['exif:Make']=="Apple"){
+                                    this
+                                        .rotate("white",90)
+                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                            callback(err, data);
+                                        });
+
+                                }else{
+                                    this
+                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                            callback(err, data);
+                                        });
+                                }
                             });
+                        //gm(tempPath)
+                        //    .write(dirPath + getRawName(req.files.image.name), function (err) {
+                        //        callback(err, data);
+                        //    });
 
                     },
                     function (callback) {
-
-                        imageManager.getImageSize(tempPath, function () {
-                            imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
-                                imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
-                                    callback(err, data);
-                                });
+                        gm(tempPath)
+                            .identify(function (err, data) {
+                                if(data.Properties['exif:Orientation']==6 && data.Properties['exif:Make']=="Apple"){
+                                    imageManager.getImageSize(tempPath,true,function(){
+                                        imageManager.rotateAndCropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
+                                            imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
+                                                callback(err, data);
+                                            });
+                                        });
+                                    })
+                                }else{
+                                    imageManager.getImageSize(tempPath,false, function (image) {
+                                        imageManager.cropImage(image, getFormatedName(req.files.image.name), function (newFilePath) {
+                                            imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
+                                                callback(err, data);
+                                            });
+                                        });
+                                    });
+                                }
                             });
-                        });
+
+                        //imageManager.getImageSize(tempPath, function () {
+                        //    imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
+                        //        imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
+                        //            callback(err, data);
+                        //        });
+                        //    });
+                        //});
 
                     }
                 ], function (data) {
