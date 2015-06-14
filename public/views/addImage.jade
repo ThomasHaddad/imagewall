@@ -17,25 +17,28 @@ html
                 img(src=image.formatedUrl)
 
         select
+            option(value="Default") Default
             option(value="Monochrome") Monochrome
             option(value="Charcoal") Charcoal
             option(value="LowColor") LowColor
             option(value="Negative") Negative
             option(value="Sepia") Sepia
             option(value="Colorized") Colorized
-            option(value="Default") Default
+        input#message(type="text", placeholder="One Word Sums Everything",maxlength="10")
     script(src="/socket.io/socket.io.js")
     script.
         var socket = io();
         var image = !{JSON.stringify(image)}
 
-        //select the good option on page load
+        //select the good option and set message on page load
         if(image.filterType){
             $('select').val(image.filterType).attr('selected','selected');
         }else{
             $('select').val('Default').attr('selected','selected')
         }
-
+        if(image.message){
+            $('#message').val(image.message);
+        }
         //ajax on select
         $('select').on('change',function(){
             console.log($(this).val())
@@ -52,6 +55,22 @@ html
                 success: function (result) {
                     $('img').attr('src',result+'?i='+Date.now());
                     $('select').show();
+                }
+            });
+        });
+
+        //ajax message change
+        $('#message').on('keyup',function(){
+            console.log($(this).val())
+            var self = $(this);
+            $.ajax({
+                url: '/addMessage',
+                type: 'POST',
+                data: {
+                    value:self.val().trim().split(/[\s,]+/)[0].substring(0,10)
+                },
+                success: function (result) {
+                    console.log(result);
                 }
             });
         });

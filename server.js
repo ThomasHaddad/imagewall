@@ -60,7 +60,7 @@ var ImageSchema = new Schema({
     position: {}, // to be determined
     owner: {type: Schema.ObjectId, ref: "User"},
     score: Number, // to be determined
-    character: String,
+    message: String,
     font: String
 });
 
@@ -267,7 +267,6 @@ app.post('/filterImage', function (req, res) {
             if (req.body.value != 'Default') {
                 imageManager['set' + req.body.value + 'Image'](dirPath + getFormatedName(img.name), getFilteredName(img.name), function (err, data) {
                     if (err) throw err;
-                    //fs.unlink(dirPath + getFilteredName(img.name), function (err) {
 
                     img.filteredUrl = setFilteredUrl(baseUrl, img.name);
                     img.filterType=req.body.value;
@@ -275,8 +274,7 @@ app.post('/filterImage', function (req, res) {
                         if (err) throw err;
                         io.emit('imageFiltered', {image: image.filteredUrl, client: req.cookies.user});
                         res.json(image.filteredUrl);
-                    })
-                    //})
+                    });
                 });
             } else {
                 fs.unlink(dirPath + getFilteredName(img.name), function (err) {
@@ -292,7 +290,20 @@ app.post('/filterImage', function (req, res) {
         }
     });
 });
-
+app.post('/addMessage',function(req,res){
+    var baseUrl = req.protocol + '://' + req.get('host');
+    Image.findOne({owner: req.cookies.user}, function (err, img) {
+        if (err) throw err;
+        if (img) {
+            img.message = req.body.value;
+            img.save(function (err, image) {
+                if (err) throw err;
+                io.emit('messageSent', {message: image.message, client: req.cookies.user});
+                res.json(image.message);
+            });
+        }
+    });
+});
 app.get('/clear', function (req, res) {
     // Delete all the uploaded files
     fs.readdir(dirPath, function (err, files) {
