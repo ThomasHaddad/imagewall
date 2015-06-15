@@ -8,14 +8,15 @@ html
         h1!= message
 
         form(action="/upload", method="post", enctype="multipart/form-data")
-            input(type="file", name="image", accept="image/*")
+            input(id="file", type="file", name="image", accept="image/*")
             input(type="submit", value="submit",id="submit")
         if(image)
             if(image.filteredUrl)
                 img(src=image.filteredUrl)
             else
                 img(src=image.formatedUrl)
-
+        else
+            img(src="")
         select
             option(value="Default") Default
             option(value="Monochrome") Monochrome
@@ -30,14 +31,47 @@ html
         var socket = io();
         var image = !{JSON.stringify(image)}
 
+
+        console.log(image);
+        $(function(){
+            if($('img').attr('src')==''){
+                $('img,select,#message').hide();
+            }
+        })
+        $('form').submit(function(e){
+            var $form = $(this);
+            var formdata = (window.FormData) ? new FormData($form[0]) : null;
+            var data = (formdata !== null) ? formdata : $form.serialize();
+            e.preventDefault();
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                contentType: false, // obligatoire pour de l'upload
+                processData: false, // obligatoire pour de l'upload
+                dataType: 'json', // selon le retour attendu
+                data: data,
+                beforeSend:function(){
+                    $('#submit').hide();
+                },
+                success: function (result) {
+                    $('img').attr('src',result+'?i='+Date.now());
+                    if($('img').css('display')=='none'){
+                        $('img').show();
+                    }
+                    $('#submit,select,#message').show();
+                }
+            });
+        })
         //select the good option and set message on page load
-        if(image.filterType){
-            $('select').val(image.filterType).attr('selected','selected');
-        }else{
-            $('select').val('Default').attr('selected','selected')
-        }
-        if(image.message){
-            $('#message').val(image.message);
+        if(image){
+            if(image.filterType){
+                $('select').val(image.filterType).attr('selected','selected');
+            }else{
+                $('select').val('Default').attr('selected','selected')
+            }
+            if(image.message){
+                $('#message').val(image.message);
+            }
         }
         //ajax on select
         $('select').on('change',function(){

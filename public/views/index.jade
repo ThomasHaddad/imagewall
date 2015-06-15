@@ -5,8 +5,9 @@ html
         title ImageWall |
             !=  title
     body
-        h1!= message
-        a(href='add') add an image
+        header
+            h1!= message
+            //a(href='add') add an image
         div#imageWall
             - each image in images
                 div.image(data-client="#{image.owner}")
@@ -18,8 +19,11 @@ html
                         if(image.message)
                         !=image.message
     script(src="/socket.io/socket.io.js")
+    script(src="/js/parallax.js")
     script.
         var images = !{JSON.stringify(images)}
+        var scene = document.getElementById('scene');
+        var parallax = new Parallax(scene);
     script(src="/js/index.js")
 
 

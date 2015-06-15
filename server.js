@@ -152,6 +152,8 @@ function setFilteredUrl(baseUrl, name) {
 app.post('/upload', function (req, res) {
     var baseUrl = req.protocol + '://' + req.get('host');
     var tempPath = req.files.image.path;
+    var thanksApple = false;
+    console.log(tempPath);
     if (req.files.image.mimetype.indexOf('image') == -1) {
         res.json('Only images are accepted');
         res.end();
@@ -159,37 +161,75 @@ app.post('/upload', function (req, res) {
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
+            console.log('01');
             fs.readFile(tempPath, function (err, data) {
                 if (err) throw err;
                 async.parallel([
                     // RAW IMAGE
                     function (callback) {
-
                         gm(tempPath)
-                            .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                fs.unlink(dirPath + getRawName(img.name), function (err) {
-                                    if (err) throw err;
-                                    callback(err, data);
-                                });
+                            .identify(function (err, data) {
+                                if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
+                                    this
+                                        .rotate("white", 90)
+                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                            console.log('raw image: ' +getRawName(req.files.image.name))
+                                            fs.unlink(dirPath + getRawName(img.name), function (err) {
+                                                if (err) throw err;
+                                                callback(err, data);
+                                            });
+                                        });
+                                }else{
+                                    this
+                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                            fs.unlink(dirPath + getRawName(img.name), function (err) {
+                                                if (err) throw err;
+                                                callback(err, data);
+                                            });
+                                        });
+                                }
                             });
 
                     },
                     // FORMATED IMAGE
                     function (callback) {
                         // manip d'image
-                        imageManager.getImageSize(tempPath, function () {
-                            imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
-                                imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function (newFilePath) {
-                                    gm(newFilePath)
-                                        .write(dirPath + getFormatedName(req.files.image.name), function (err) {
-                                            fs.unlink(dirPath + getFormatedName(img.name), function (err) {
-                                                callback(err, data);
-                                            });
+                        gm(tempPath)
+                            .identify(function (err, data) {
+                                if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
+                                    thanksApple = true;
+                                }
+                                imageManager.getImageSize(tempPath, thanksApple, function () {
+                                    if(thanksApple){
+                                        imageManager.rotateAndCropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
+                                            imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function (newFilePath) {
+                                                gm(newFilePath)
+                                                    .write(dirPath + getFormatedName(req.files.image.name), function (err) {
+                                                        fs.unlink(dirPath + getFormatedName(img.name), function (err) {
+                                                            if(err) throw err;
+                                                            callback(err, data);
+                                                        });
 
-                                        })
+                                                    })
+                                            });
+                                        });
+                                    }else{
+
+                                        imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
+                                            imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function (newFilePath) {
+                                                gm(newFilePath)
+                                                    .write(dirPath + getFormatedName(req.files.image.name), function (err) {
+                                                        fs.unlink(dirPath + getFormatedName(img.name), function (err) {
+                                                            if (err) throw err;
+                                                            callback(err, data);
+                                                        });
+
+                                                    })
+                                            });
+                                        });
+                                    }
                                 });
                             });
-                        });
                     }
                 ], function (data) {
                     fs.unlink(tempPath, function (err) {
@@ -199,13 +239,14 @@ app.post('/upload', function (req, res) {
                         img.rawUrl = setRawUrl(baseUrl, img.name);
                         img.formatedUrl = setFormatedUrl(baseUrl, img.name);
                         img.filteredUrl = null;
-                        img.filterType=null;
+                        img.filterType = null;
 
                         img.save(function (err, image) {
                             if (err) throw err;
                             io.emit('imageAdded', {image: image.formatedUrl, client: req.cookies.user});
-                            res.contentType(image.contentType);
-                            res.redirect("/add");
+                            //res.contentType(image.contentType);
+                            //res.redirect("/add");
+                            res.json(image.formatedUrl);
                         });
                     });
 
@@ -219,56 +260,46 @@ app.post('/upload', function (req, res) {
                     function (callback) {
                         gm(tempPath)
                             .identify(function (err, data) {
-                                if(data.Properties['exif:Orientation']==6 && data.Properties['exif:Make']=="Apple"){
+                                if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
                                     this
-                                        .rotate("white",90)
+                                        .rotate("white", 90)
                                         .write(dirPath + getRawName(req.files.image.name), function (err) {
                                             callback(err, data);
                                         });
 
-                                }else{
+                                } else {
                                     this
                                         .write(dirPath + getRawName(req.files.image.name), function (err) {
                                             callback(err, data);
                                         });
                                 }
                             });
-                        //gm(tempPath)
-                        //    .write(dirPath + getRawName(req.files.image.name), function (err) {
-                        //        callback(err, data);
-                        //    });
 
                     },
                     function (callback) {
                         gm(tempPath)
                             .identify(function (err, data) {
-                                if(data.Properties['exif:Orientation']==6 && data.Properties['exif:Make']=="Apple"){
-                                    imageManager.getImageSize(tempPath,true,function(){
+                                if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
+                                    thanksApple = true;
+                                }
+                                imageManager.getImageSize(tempPath, thanksApple, function () {
+                                    if(thanksApple){
                                         imageManager.rotateAndCropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
                                             imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
                                                 callback(err, data);
                                             });
                                         });
-                                    })
-                                }else{
-                                    imageManager.getImageSize(tempPath,false, function (image) {
-                                        imageManager.cropImage(image, getFormatedName(req.files.image.name), function (newFilePath) {
+                                    }else{
+                                        imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
                                             imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
                                                 callback(err, data);
                                             });
                                         });
-                                    });
-                                }
+
+                                    }
+                                })
+
                             });
-
-                        //imageManager.getImageSize(tempPath, function () {
-                        //    imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
-                        //        imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
-                        //            callback(err, data);
-                        //        });
-                        //    });
-                        //});
-
                     }
                 ], function (data) {
                     fs.unlink(tempPath, function (err) {
@@ -279,13 +310,14 @@ app.post('/upload', function (req, res) {
                         image.formatedUrl = setFormatedUrl(baseUrl, image.name);
                         image.contentType = req.files.image.mimetype;
                         image.owner = req.cookies.user;
-
+                        image.filterType = null;
 
                         image.save(function (err, image) {
                             if (err) throw err;
                             io.emit('imageAdded', {image: image.formatedUrl, client: req.cookies.user});
-                            res.contentType(image.contentType);
-                            res.redirect("/add");
+                            //res.contentType(image.contentType);
+                            //res.redirect("/add");
+                            res.json(image.formatedUrl);
                         });
                     });
                 });
@@ -306,7 +338,7 @@ app.post('/filterImage', function (req, res) {
                     if (err) throw err;
 
                     img.filteredUrl = setFilteredUrl(baseUrl, img.name);
-                    img.filterType=req.body.value;
+                    img.filterType = req.body.value;
                     img.save(function (err, image) {
                         if (err) throw err;
                         io.emit('imageFiltered', {image: image.filteredUrl, client: req.cookies.user});
@@ -316,7 +348,7 @@ app.post('/filterImage', function (req, res) {
             } else {
                 fs.unlink(dirPath + getFilteredName(img.name), function (err) {
                     img.filteredUrl = null;
-                    img.filterType=null;
+                    img.filterType = null;
                     img.save(function (err, image) {
                         if (err) throw err;
                         io.emit('imageFiltered', {image: image.formatedUrl, client: req.cookies.user});
@@ -327,7 +359,7 @@ app.post('/filterImage', function (req, res) {
         }
     });
 });
-app.post('/addMessage',function(req,res){
+app.post('/addMessage', function (req, res) {
     var baseUrl = req.protocol + '://' + req.get('host');
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
