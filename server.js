@@ -172,24 +172,15 @@ app.post('/upload', function (req, res) {
                                 if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
                                     this
                                         .rotate("white", 90)
-                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                            console.log('raw image: ' +getRawName(req.files.image.name))
-                                            fs.unlink(dirPath + getRawName(img.name), function (err) {
-                                                if (err) throw err;
-                                                callback(err, data);
-                                            });
-                                        });
-                                }else{
-                                    this
-                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                            fs.unlink(dirPath + getRawName(img.name), function (err) {
-                                                if (err) throw err;
-                                                callback(err, data);
-                                            });
-                                        });
                                 }
+                                this
+                                    .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                        fs.unlink(dirPath + getRawName(img.name), function (err) {
+                                            if (err) throw err;
+                                            callback(err, data);
+                                        });
+                                    });
                             });
-
                     },
                     // FORMATED IMAGE
                     function (callback) {
@@ -200,34 +191,18 @@ app.post('/upload', function (req, res) {
                                     thanksApple = true;
                                 }
                                 imageManager.getImageSize(tempPath, thanksApple, function () {
-                                    if(thanksApple){
-                                        imageManager.rotateAndCropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
-                                            imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function (newFilePath) {
-                                                gm(newFilePath)
-                                                    .write(dirPath + getFormatedName(req.files.image.name), function (err) {
-                                                        fs.unlink(dirPath + getFormatedName(img.name), function (err) {
-                                                            if(err) throw err;
-                                                            callback(err, data);
-                                                        });
+                                    imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), thanksApple, function (newFilePath) {
+                                        imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function (newFilePath) {
+                                            gm(newFilePath)
+                                                .write(dirPath + getFormatedName(req.files.image.name), function (err) {
+                                                    fs.unlink(dirPath + getFormatedName(img.name), function (err) {
+                                                        if (err) throw err;
+                                                        callback(err, data);
+                                                    });
 
-                                                    })
-                                            });
+                                                })
                                         });
-                                    }else{
-
-                                        imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
-                                            imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function (newFilePath) {
-                                                gm(newFilePath)
-                                                    .write(dirPath + getFormatedName(req.files.image.name), function (err) {
-                                                        fs.unlink(dirPath + getFormatedName(img.name), function (err) {
-                                                            if (err) throw err;
-                                                            callback(err, data);
-                                                        });
-
-                                                    })
-                                            });
-                                        });
-                                    }
+                                    });
                                 });
                             });
                     }
@@ -263,16 +238,12 @@ app.post('/upload', function (req, res) {
                                 if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
                                     this
                                         .rotate("white", 90)
-                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                            callback(err, data);
-                                        });
-
-                                } else {
-                                    this
-                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                            callback(err, data);
-                                        });
                                 }
+
+                                this
+                                    .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                        callback(err, data);
+                                    });
                             });
 
                     },
@@ -283,20 +254,13 @@ app.post('/upload', function (req, res) {
                                     thanksApple = true;
                                 }
                                 imageManager.getImageSize(tempPath, thanksApple, function () {
-                                    if(thanksApple){
-                                        imageManager.rotateAndCropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
-                                            imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
-                                                callback(err, data);
-                                            });
+                                    imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), thanksApple, function (newFilePath) {
+                                        imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
+                                            callback(err, data);
                                         });
-                                    }else{
-                                        imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), function (newFilePath) {
-                                            imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
-                                                callback(err, data);
-                                            });
-                                        });
+                                    });
 
-                                    }
+
                                 })
 
                             });
@@ -322,7 +286,6 @@ app.post('/upload', function (req, res) {
                     });
                 });
             });
-
         }
     });
 });
