@@ -93,6 +93,15 @@ $(function () {
 
     });
     socket.on('messageSent',function(data){
-        $('#imageWall .image[data-client="' + data.client + '"] p').html(data.message)
+        if(data.message){
+
+            if($('#imageWall .image[data-client="' + data.client + '"] p').length!=0){
+                $('#imageWall .image[data-client="' + data.client + '"] p').html(data.message)
+            }else{
+                $('#imageWall .image[data-client="' + data.client + '"]').append("<p>"+data.message+"</p>")
+            }
+        }else{
+            $('#imageWall .image[data-client="' + data.client + '"] p').remove();
+        }
     });
 });

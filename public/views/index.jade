@@ -15,9 +15,9 @@ html
                         img(src=image.filteredUrl )
                     else
                         img(src=image.formatedUrl)
-                    p
-                        if(image.message)
-                        !=image.message
+                    if(image.message)
+                        p
+                            !=image.message
     script(src="/socket.io/socket.io.js")
     script(src="/js/parallax.js")
     script.
