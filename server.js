@@ -169,17 +169,25 @@ app.post('/upload', function (req, res) {
                     function (callback) {
                         gm(tempPath)
                             .identify(function (err, data) {
-                                if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
+                                console.log(data.Properties);
+                                if (data.Properties['exif:Make'] == "Apple") {
                                     this
-                                        .rotate("white", 90)
-                                }
-                                this
-                                    .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                        fs.unlink(dirPath + getRawName(img.name), function (err) {
-                                            if (err) throw err;
-                                            callback(err, data);
+                                        .autoOrient()
+                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                            fs.unlink(dirPath + getRawName(img.name), function (err) {
+                                                if (err) throw err;
+                                                callback(err, data);
+                                            });
                                         });
-                                    });
+                                }else{
+                                    this
+                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                            fs.unlink(dirPath + getRawName(img.name), function (err) {
+                                                if (err) throw err;
+                                                callback(err, data);
+                                            });
+                                        });
+                                }
                             });
                     },
                     // FORMATED IMAGE
@@ -187,7 +195,7 @@ app.post('/upload', function (req, res) {
                         // manip d'image
                         gm(tempPath)
                             .identify(function (err, data) {
-                                if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
+                                if (data.Properties['exif:Make'] == "Apple") {
                                     thanksApple = true;
                                 }
                                 imageManager.getImageSize(tempPath, thanksApple, function () {
@@ -235,15 +243,19 @@ app.post('/upload', function (req, res) {
                     function (callback) {
                         gm(tempPath)
                             .identify(function (err, data) {
-                                if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
+                                if (data.Properties['exif:Make'] == "Apple") {
                                     this
-                                        .rotate("white", 90)
+                                        .autoOrient()
+                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                            callback(err, data);
+                                        });
+                                }else{
+                                    this
+                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                            callback(err, data);
+                                        });
                                 }
 
-                                this
-                                    .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                        callback(err, data);
-                                    });
                             });
 
                     },
