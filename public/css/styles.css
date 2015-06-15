@@ -6,6 +6,7 @@ header{
     left:0;
     background-color: #000000;
     z-index: 100;
+    text-align: center;
 }
 header h1{
     color:#fff;
@@ -23,7 +24,7 @@ header a:hover{
 
 #imageWall{
     position: relative;
-    margin-top:50px;
+    margin-top:100px;
 }
 #imageWall .image{
     width: 200px;

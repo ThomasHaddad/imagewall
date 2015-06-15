@@ -7,7 +7,7 @@ html
     body
         header
             h1!= message
-            //a(href='add') add an image
+            a(href='add') Participer!
         div#imageWall
             - each image in images
                 div.image(data-client="#{image.owner}")
