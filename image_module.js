@@ -6,7 +6,7 @@ module.exports = function () {
     var i = {
         self: self,
         dirPath: './public/uploads/',
-        newImagesize: null,
+        newImageSize: null,
         cropValues: {
             x: null,
             y: null
@@ -23,57 +23,52 @@ module.exports = function () {
         },
         getImageSize: function (imagePath, thanksApple, callback) {
 
-            if (!thanksApple) {
                 gm(imagePath)
                     .size(function (err, data) {
 
                         console.log(data);
-                        self.currentImageSize.width = data.width;
-                        self.currentImageSize.height = data.height;
-                        self.currentImageSize.ratio = data.width / data.height;
+                        if(!thanksApple){
+                            self.currentImageSize.width = data.width;
+                            self.currentImageSize.height = data.height;
+                            self.currentImageSize.ratio = data.width / data.height;
+
+                        }else{
+                            self.currentImageSize.width = data.height;
+                            self.currentImageSize.height = data.width;
+                            self.currentImageSize.ratio = data.height / data.width;
+                        }
                         self.getNewValues(self.currentImageSize, self.expectedImageSize);
                         self.getCropValues(self.currentImageSize, self.newImageSize);
                         callback();
+                    });
+
+        },
+        cropImage: function (imagePath, newFileName,thanksApple, callback) {
+            var newFilePath = self.dirPath + newFileName;
+            //console.log('future formated filename : ' + newFileName);
+            if(!thanksApple){
+                gm(imagePath)
+                    .crop(self.newImageSize.width, self.newImageSize.height, self.cropValues.x, self.cropValues.y)
+                    .write(newFilePath, function (err) {
+                        if (err) throw err;
+                        callback(newFilePath);
                     });
             }else{
                 gm(imagePath)
-                    .rotate("white",90)
-                    .size(function (err, data) {
-                        console.log(data);
-                        self.currentImageSize.width = data.height;
-                        self.currentImageSize.height = data.width;
-                        self.currentImageSize.ratio = data.width / data.height;
-                        self.getNewValues(self.currentImageSize, self.expectedImageSize);
-                        self.getCropValues(self.currentImageSize, self.newImageSize);
-                        callback();
+                    //.rotate("white",90)
+                    .crop(self.newImageSize.height, self.newImageSize.width, self.cropValues.y, self.cropValues.x)
+                    .autoOrient()
+                    .write(newFilePath, function (err) {
+                        if (err) throw err;
+                        callback(newFilePath);
                     });
             }
-        },
-        cropImage: function (imagePath, newFileName, callback) {
-            var newFilePath = self.dirPath + newFileName;
-            //console.log('future formated filename : ' + newFileName);
-            gm(imagePath)
-                .crop(self.newImageSize.width, self.newImageSize.height, self.cropValues.x, self.cropValues.y)
-                .write(newFilePath, function (err) {
-                    if (err) throw err;
-                    callback(newFilePath);
-                });
-        },
-        rotateAndCropImage: function (imagePath, newFileName, callback) {
-            var newFilePath = self.dirPath + newFileName;
-            //console.log('future formated filename : ' + newFileName);
-            gm(imagePath)
-                .rotate("white",90)
-                .crop(self.newImageSize.height, self.newImageSize.width, self.cropValues.y, self.cropValues.x)
-                .write(newFilePath, function (err) {
-                    if (err) throw err;
-                    callback(newFilePath);
-                });
         },
         resizeImage: function (fileName, expectedImagesize, callback) {
             gm(fileName)
                 .resize(self.expectedImageSize.width, self.expectedImageSize.height)
                 .write(fileName, function (err) {
+                    console.log(self.expectedImageSize);
                     if (err) throw err;
                     callback(fileName);
                 });

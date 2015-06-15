@@ -1,5 +1,30 @@
+header{
+    position:fixed;
+    height:100px;
+    width: 100%;
+    top:0;
+    left:0;
+    background-color: #000000;
+    z-index: 100;
+    text-align: center;
+}
+header h1{
+    color:#fff;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 10px;
+}
+header a{
+    color: #fff;
+    text-decoration: none;
+}
+header a:hover{
+    color:lightgrey;
+}
+
 #imageWall{
     position: relative;
+    margin-top:100px;
 }
 #imageWall .image{
     width: 200px;
