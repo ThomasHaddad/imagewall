@@ -1,31 +1,33 @@
 html
     head
-        link(rel='stylesheet', href='/css/styles.css')
+        link(rel='stylesheet', href='/css/index.css')
         script(src="/js/jquery.js")
+
         title ImageWall |
             !=  title
     body
-        header
-            h1!= message
-            a(href='add') Participer!
-        div#imageWall
-            - each image in images
-                div.image(data-client="#{image.owner}")
-                    if(image.filteredUrl)
-                        img(src=image.filteredUrl )
-                    else
-                        img(src=image.formatedUrl)
-                    if(image.message)
-                        p
-                            !=image.message
-    script(src="/socket.io/socket.io.js")
-    script(src="/js/parallax.js")
+        div#wrapper
+            header
+                h1 Imagewall
+            div#choice
+                a(id="wall" href='imagewall') Voir le mur
+                a(href='add') Participer
+
     script.
-        var images = !{JSON.stringify(images)}
-        var scene = document.getElementById('imageWall');
-        var parallax = new Parallax(scene);
-    script(src="/js/index.js")
-
-
-
-
+        $(function(){
+            $('#wall').on('click',function(){
+                launchIntoFullscreen(document.documentElement); // the whole page
+            })
+        });
+        function launchIntoFullscreen(element) {
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+        }
+        // Launch fullscreen for browsers that support it!

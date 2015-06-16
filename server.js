@@ -83,14 +83,21 @@ io.on('connection', function (socket) {
 
 
 // URLS management
-
-app.get('/', function (req, res) {
+app.get('/',function(req,res){
+    res.render('index', {title: 'Home'});
+});
+app.get('/imagewall', function (req, res) {
+    console.log(req.cookies.user);
     Image.find({}, function (err, docs) {
         if (!err) {
         } else {
             var docs = {};
         }
-        res.render('index', {title: 'home', message: 'Image Wall', images: docs});
+        if(req.cookies.user){
+            res.render('wall', {title: 'Wall', message: 'Image Wall', images: docs, client:req.cookies.user});
+        }else{
+            res.render('wall', {title: 'Wall', message: 'Image Wall', images: docs});
+        }
     });
 });
 
