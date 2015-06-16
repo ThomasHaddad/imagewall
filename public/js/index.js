@@ -32,17 +32,35 @@ $(function () {
         }
 
     }
-    function calculateMarginY(y){
+
+    function calculateMarginY(y) {
         if (y < 0 && origin.top < Math.abs(y * defaultSize.height)) {
             margin.top = Math.abs(y * defaultSize.height) - origin.top;
             $('#imageWall').css('margin-top', margin.top + "px")
         }
     }
+
+
+    // draggable wall
+    $('#imageWall').draggable({
+        helper: function () {
+
+            return $('<div></div>').css('opacity', 0);
+        },
+        drag: function (event, ui) {
+
+            var p = ui.helper.position();
+            $(this).stop().animate({
+                top: p.top,
+                left: p.left
+            }, 750, 'easeOutCirc');
+        }
+    });
     // Draw spiral when images are loaded
     $(window).load(function () {
 
         if (images.length) {
-            for (var i = 0; i <=images.length; i++) {
+            for (var i = 0; i <= images.length; i++) {
                 img = $('#imageWall .image').eq(i);
                 if ((-width / 2 < x <= width / 2)
                     && (-height / 2 < y <= height / 2)) {
@@ -55,7 +73,10 @@ $(function () {
                         })
                     } else {
 
-                        $("body").scrollTo({top:(margin.top+origin.top-(window.innerHeight/2)+defaultSize.height/2)+"px",left:(margin.left+origin.left- (window.innerWidth/2)+ (defaultSize.width / 2))+"px"});
+                        $("body").scrollTo({
+                            top: (margin.top + origin.top - (window.innerHeight / 2) + defaultSize.height / 2) + "px",
+                            left: (margin.left + origin.left - (window.innerWidth / 2) + (defaultSize.width / 2)) + "px"
+                        });
                         break;
                     }
                 }
@@ -98,8 +119,8 @@ $(function () {
         e.preventDefault();
 
         $("body").scrollTo({
-            top: ownImage.position().top + margin.top  - (window.innerHeight/2)+ (defaultSize.height) + "px",
-            left: ownImage.position().left + margin.left  - (window.innerHeight/2)+ (defaultSize.width / 2) + "px"
+            top: ownImage.position().top + margin.top - (window.innerHeight / 2) + (defaultSize.height) + "px",
+            left: ownImage.position().left + margin.left - (window.innerHeight / 2) + (defaultSize.width / 2) + "px"
         }, 800, {
             onAfter: function () {
                 $(".image[data-self='true']").removeClass('animate');
