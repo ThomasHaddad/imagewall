@@ -1,6 +1,7 @@
 var fs = require('fs');
 var gm = require('gm').subClass({imageMagick: true});
 var nameManager = require('./name_module');
+var i = require('./imageFormat_module');
 var imageFormat = require('./imageFormat_module');
 
 /** @module imageSaver */
@@ -9,26 +10,30 @@ module.exports = {
      * nameNamager dependency
      */
     nameManager: nameManager,
+
     /**
      * imageFormat dependency
      */
     imageFormat: imageFormat,
+
     /**
      * exif metadata parameter for Apple devices
      */
     thanksApple: false,
+
     /**
-     *
-     * @param request
+     * store the file image path received from request
+     * @param {object} request
      */
     setFilePath: function (request) {
         this.filePath = request.files.image.path;
     },
+
     /**
      * create a new raw image and delete the previous one
-     * @object request
-     * @string currentImage
-     * @function callback
+     * @param {object} request
+     * @param {string} currentImage
+     * @param {function} callback
      */
     overwriteRawImage: function (request, currentImage, callback) {
         var self = this;
@@ -55,11 +60,12 @@ module.exports = {
                 }
             });
     },
+
     /**
      * create a new formated image and delete the previous one
-     * @object request
-     * @string currentImage
-     * @function callback
+     * @param {object} request
+     * @param {string} currentImage
+     * @param {function} callback
      */
     overwriteFormatedImage: function (request, currentImage, callback) {
         var self = this;
@@ -85,10 +91,11 @@ module.exports = {
                 });
             });
     },
+
     /**
      * create a new raw image
-     * @object request
-     * @function callback
+     * @param {object} request
+     * @param {function} callback
      */
     saveNewRawImage: function (request, callback) {
         var self = this;
@@ -111,10 +118,11 @@ module.exports = {
             });
 
     },
+    
     /**
      * create a new formated image
-     * @object request
-     * @function callback
+     * @param {object} request
+     * @param {function} callback
      */
     saveNewFormatedImage: function (request, callback) {
         var self = this;

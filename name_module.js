@@ -5,30 +5,36 @@ module.exports = {
      * string
      */
     rawExtension: '',
+
     /**
      * string
      */
     formatedExtension: '',
+
     /**
      * string
      */
     filteredExtension: '',
+
     /**
      * string
      */
     directory: '/uploads/',
+
     /** string
      *
      */
     baseUrl: "",
 
+
     /**
-     * Defines url of the image (http://...) using req as parameter
-     * @object request
+     *
+     * @param request - json
      */
     setBaseUrl: function (request) {
         this.baseUrl = request.protocol + '://' + request.get('host');
     },
+
     /**
      *
      * @returns {string}
@@ -36,13 +42,15 @@ module.exports = {
     getBaseUrl: function () {
         return this.baseUrl;
     },
+
     /**
      *
-     * @string dirName
+     * @param dirName
      */
     setDirectory: function (dirName) {
         this.directory = dirName;
     },
+
     /**
      *
      * @returns {string}
@@ -50,27 +58,31 @@ module.exports = {
     getDirectory: function () {
         return this.directory;
     },
+
     /**
      *
-     * @string arg
+     * @param arg
      */
     setRawExtension: function (arg) {
         this.rawExtension = arg;
     },
+
     /**
      *
-     * @string arg
+     * @param arg
      */
     setFormatedExtension: function (arg) {
         this.formatedExtension = arg;
     },
+
     /**
      *
-     * @string arg
+     * @param arg
      */
     setFilteredExtension: function (arg) {
         this.filteredExtension = arg;
     },
+
     /**
      *
      * @returns {string}
@@ -78,6 +90,7 @@ module.exports = {
     getRawExtension: function () {
         return this.rawExtension;
     },
+
     /**
      *
      * @returns {string}
@@ -85,6 +98,7 @@ module.exports = {
     getFormatedExtension: function () {
         return this.formatedExtension;
     },
+
     /**
      *
      * @returns {string}
@@ -92,54 +106,60 @@ module.exports = {
     getFilteredExtension: function () {
         return this.filteredExtension;
     },
+
     /**
      *
-     * @string name
+     * @param {string} name
      * @returns {string}
      */
     getRawName: function (name) {
         return name.split('.')[0] + this.getRawExtension() + "." + name.split('.')[1];
     },
+
     /**
      *
-     * @string name
+     * @param {string} name
      * @returns {string}
      */
     getFormatedName: function (name) {
         return name.split('.')[0] + this.getFormatedExtension() + "." + name.split('.')[1];
     },
+
     /**
      *
-     * @string name
+     * @param {string} name
      * @returns {string}
      */
     getFilteredName: function (name) {
         return name.split('.')[0] + this.getFilteredExtension() + "." + name.split('.')[1];
     },
+
     /**
      *
-     * @object request
-     * @string name
+     * @param {object} request
+     * @param {string} name
      * @returns {string}
      */
     setRawUrl: function (request, name) {
         this.setBaseUrl(request);
         return this.getBaseUrl() + this.getDirectory() + name.split('.')[0] + this.getRawExtension() + "." + name.split('.')[1];
     },
+
     /**
      *
-     * @object request
-     * @string name
+     * @param {object} request
+     * @param {string} name
      * @returns {string}
      */
     setFormatedUrl: function (request, name) {
         this.setBaseUrl(request);
         return this.getBaseUrl() + this.getDirectory() + name.split('.')[0] + this.getFormatedExtension() + "." + name.split('.')[1];
     },
+
     /**
      *
-     * @object request
-     * @string name
+     * @param {object} request
+     * @param {string} name
      * @returns {string}
      */
     setFilteredUrl: function (request, name) {
