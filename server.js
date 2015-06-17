@@ -4,28 +4,36 @@ var app = express();
 
 // Loading modules
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
 var mongoose = require('mongoose');
 var fs = require('fs');
 var path = require('path');
+
+//websocket handler
+var io = require('socket.io')(http);
+
+//form handlers
 var bodyParser = require('body-parser');
 var multer = require('multer');
+
+//cookie handler
 var cookieParser = require('cookie-parser');
+
+//async for parallels functions
 var async = require('async');
-var i = require('./image_module');
-var imageManager = new i();
 
-var gm = require('gm').subClass({imageMagick: true});
-//configuring imageManager
-imageManager.dirPath = './public/uploads/';
-imageManager.expectedImageSize.ratio = imageManager.expectedImageSize.width / imageManager.expectedImageSize.height;
 
-var nameManager = require('./name_module');
-//configuring nameManager
-nameManager.setRawExtension('-r');
-nameManager.setFormatedExtension('-f');
-nameManager.setFilteredExtension('-m');
-nameManager.setDirectory('/uploads/');
+// image module : covering saving,naming,filtering,cropping,resizing... everything
+var imageSaver = require('./imageSaver_module');
+
+//configuring imageSaver.imageFormat
+imageSaver.imageFormat.setDirectoryPath('./public/uploads/');
+imageSaver.imageFormat.setExpectedImageSize(200,150);
+
+//configuring imageSaver.nameManager
+imageSaver.nameManager.setRawExtension('-r');
+imageSaver.nameManager.setFormatedExtension('-f');
+imageSaver.nameManager.setFilteredExtension('-m');
+imageSaver.nameManager.setDirectory('/uploads/');
 
 //Configuring modules
 app.set('view engine', 'jade');
@@ -127,9 +135,7 @@ app.get('/add', function (req, res) {
 });
 
 app.post('/upload', function (req, res) {
-    var baseUrl = req.protocol + '://' + req.get('host');
     var tempPath = req.files.image.path;
-    var thanksApple = false;
     if (req.files.image.mimetype.indexOf('image') == -1) {
         res.json('Only images are accepted');
         res.end();
@@ -142,68 +148,26 @@ app.post('/upload', function (req, res) {
                 async.parallel([
                     // RAW IMAGE
                     function (callback) {
-                        gm(tempPath)
-                            .identify(function (err, data) {
-                                console.log(data.Properties);
-                                if (data.Properties['exif:Make'] == "Apple") {
-                                    this
-                                        .autoOrient()
-                                        .write(imageManager.dirPath + nameManager.getRawName(req.files.image.name), function (err) {
-                                            fs.unlink(imageManager.dirPath + nameManager.getRawName(img.name), function (err) {
-                                                if (err) throw err;
-                                                callback(err, data);
-                                            });
-                                        });
-                                }else{
-                                    this
-                                        .write(imageManager.dirPath + nameManager.getRawName(req.files.image.name), function (err) {
-                                            fs.unlink(imageManager.dirPath + nameManager.getRawName(img.name), function (err) {
-                                                if (err) throw err;
-                                                callback(err, data);
-                                            });
-                                        });
-                                }
-                            });
+                        imageSaver.overwriteRawImage(req,img,callback);
                     },
                     // FORMATED IMAGE
                     function (callback) {
                         // manip d'image
-                        gm(tempPath)
-                            .identify(function (err, data) {
-                                if (data.Properties['exif:Make'] == "Apple") {
-                                    thanksApple = true;
-                                }
-                                imageManager.getImageSize(tempPath, thanksApple, function () {
-                                    imageManager.cropImage(tempPath, nameManager.getFormatedName(req.files.image.name), thanksApple, function (newFilePath) {
-                                        imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function (newFilePath) {
-                                            gm(newFilePath)
-                                                .write(imageManager.dirPath + nameManager.getFormatedName(req.files.image.name), function (err) {
-                                                    fs.unlink(imageManager.dirPath + nameManager.getFormatedName(img.name), function (err) {
-                                                        if (err) throw err;
-                                                        callback(err, data);
-                                                    });
-
-                                                })
-                                        });
-                                    });
-                                });
-                            });
+                        imageSaver.overwriteFormatedImage(req,img,callback);
                     }
                 ], function (data) {
                     fs.unlink(tempPath, function (err) {
                         if (err) throw err;
                         img.name = req.files.image.name;
                         img.contentType = req.files.image.mimetype;
-                        img.rawUrl = nameManager.setRawUrl(baseUrl, img.name);
-                        img.formatedUrl = nameManager.setFormatedUrl(baseUrl, img.name);
+                        img.rawUrl = imageSaver.nameManager.setRawUrl(req, img.name);
+                        img.formatedUrl = imageSaver.nameManager.setFormatedUrl(req, img.name);
                         img.filteredUrl = null;
                         img.filterType = null;
 
                         img.save(function (err, image) {
                             if (err) throw err;
                             io.emit('imageAdded', {image: image.formatedUrl, client: req.cookies.user});
-                            //res.contentType(image.contentType);
-                            //res.redirect("/add");
                             res.json(image.formatedUrl);
                         });
                     });
@@ -216,49 +180,18 @@ app.post('/upload', function (req, res) {
                 if (err) throw err;
                 async.parallel([
                     function (callback) {
-                        gm(tempPath)
-                            .identify(function (err, data) {
-                                if (data.Properties['exif:Make'] == "Apple") {
-                                    this
-                                        .autoOrient()
-                                        .write(imageManager.dirPath + nameManager.getRawName(req.files.image.name), function (err) {
-                                            callback(err, data);
-                                        });
-                                }else{
-                                    this
-                                        .write(imageManager.dirPath + nameManager.getRawName(req.files.image.name), function (err) {
-                                            callback(err, data);
-                                        });
-                                }
-
-                            });
-
+                        imageSaver.saveNewRawImage(req,callback)
                     },
                     function (callback) {
-                        gm(tempPath)
-                            .identify(function (err, data) {
-                                if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
-                                    thanksApple = true;
-                                }
-                                imageManager.getImageSize(tempPath, thanksApple, function () {
-                                    imageManager.cropImage(tempPath, nameManager.getFormatedName(req.files.image.name), thanksApple, function (newFilePath) {
-                                        imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
-                                            callback(err, data);
-                                        });
-                                    });
-
-
-                                })
-
-                            });
+                        imageSaver.saveNewFormatedImage(req,callback)
                     }
                 ], function (data) {
                     fs.unlink(tempPath, function (err) {
                         if (err) throw err;
                         var image = new Image;
                         image.name = req.files.image.name;
-                        image.rawUrl = nameManager.setRawUrl(baseUrl, image.name);
-                        image.formatedUrl = nameManager.setFormatedUrl(baseUrl, image.name);
+                        image.rawUrl = imageSaver.nameManager.setRawUrl(req, image.name);
+                        image.formatedUrl = imageSaver.nameManager.setFormatedUrl(req, image.name);
                         image.contentType = req.files.image.mimetype;
                         image.owner = req.cookies.user;
                         image.filterType = null;
@@ -266,8 +199,6 @@ app.post('/upload', function (req, res) {
                         image.save(function (err, image) {
                             if (err) throw err;
                             io.emit('imageAdded', {image: image.formatedUrl, client: req.cookies.user});
-                            //res.contentType(image.contentType);
-                            //res.redirect("/add");
                             res.json(image.formatedUrl);
                         });
                     });
@@ -278,16 +209,15 @@ app.post('/upload', function (req, res) {
 });
 
 app.post('/filterImage', function (req, res) {
-    var baseUrl = req.protocol + '://' + req.get('host');
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
 
-            if (req.body.value != 'Default') {
-                imageManager['set' + req.body.value + 'Image'](imageManager.dirPath + nameManager.getFormatedName(img.name), nameManager.getFilteredName(img.name), function (err, data) {
+            if (req.body.value != 'None') {
+                imageSaver.imageFormat['set' + req.body.value + 'Image'](imageSaver.imageFormat.dirPath + imageSaver.nameManager.getFormatedName(img.name), imageSaver.nameManager.getFilteredName(img.name), function (err, data) {
                     if (err) throw err;
 
-                    img.filteredUrl = nameManager.setFilteredUrl(baseUrl, img.name);
+                    img.filteredUrl = imageSaver.nameManager.setFilteredUrl(req, img.name);
                     img.filterType = req.body.value;
                     img.save(function (err, image) {
                         if (err) throw err;
@@ -296,7 +226,7 @@ app.post('/filterImage', function (req, res) {
                     });
                 });
             } else {
-                fs.unlink(imageManager.dirPath + nameManager.getFilteredName(img.name), function (err) {
+                fs.unlink(imageSaver.imageFormat.dirPath + imageSaver.nameManager.getFilteredName(img.name), function (err) {
                     img.filteredUrl = null;
                     img.filterType = null;
                     img.save(function (err, image) {
@@ -326,10 +256,10 @@ app.post('/sendMessage', function (req, res) {
 
 app.get('/clear', function (req, res) {
     // Delete all the uploaded files
-    fs.readdir(imageManager.dirPath, function (err, files) {
+    fs.readdir(imageSaver.imageFormat.dirPath, function (err, files) {
         if (err) throw err;
         files.forEach(function (file) {
-            fs.unlink(imageManager.dirPath + file, function () {
+            fs.unlink(imageSaver.imageFormat.dirPath + file, function () {
                 if (err) throw err;
                 console.log('file sucessfully deleted');
             });
