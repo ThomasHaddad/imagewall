@@ -29,6 +29,7 @@ $(function () {
         if (x < 0 && origin.left < Math.abs(x * defaultSize.width)) {
             margin.left = Math.abs(x * defaultSize.width) - origin.left;
             $('#imageWall').css('margin-left', margin.left + "px")
+            img.addClass('lazy');
         }
 
     }
@@ -37,14 +38,48 @@ $(function () {
         if (y < 0 && origin.top < Math.abs(y * defaultSize.height)) {
             margin.top = Math.abs(y * defaultSize.height) - origin.top;
             $('#imageWall').css('margin-top', margin.top + "px")
+            img.addClass('lazy');
+        }
+    }
+
+
+// fullscreen
+    var fullscreen=false;
+    $('#fullscreen').on('click', function (e) {
+        e.preventDefault();
+        if(!fullscreen){
+            launchIntoFullscreen(document.documentElement); // the whole page
+            fullscreen=true;
+            $(this).html('exit fullscreen');
+        }else{
+            fullscreen=false;
+            exitFullscreen();
+            $(this).html('Fullscreen');
+        }
+    });
+    function launchIntoFullscreen(element) {
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+        }
+    }
+    function exitFullscreen() {
+        if(document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if(document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if(document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
         }
     }
 
 
     // draggable wall
-
-
-
 
 
     // Draw spiral when images are loaded
@@ -89,11 +124,11 @@ $(function () {
                 }
                 if (x < bodySize.minX) {
                     bodySize.minX = x;
-                    calculateMarginX(x);
+                    calculateMarginX(x,img);
                 }
                 if (y < bodySize.minY) {
                     bodySize.minY = y;
-                    calculateMarginY(y);
+                    calculateMarginY(y,img);
                 }
             }
         }
