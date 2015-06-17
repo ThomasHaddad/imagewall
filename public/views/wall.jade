@@ -3,6 +3,7 @@ html
         link(rel='stylesheet', href='/css/styles.css')
         script(src="/vendors/jquery.js")
         script(src="/vendors/jquery.scrollTo.min.js")
+        script(src="/vendors/jquery.visible.min.js")
         script(src="/socket.io/socket.io.js")
         title ImageWall |
             !=  title
@@ -29,7 +30,78 @@ html
                         if(image.message)
                             p
                                 !=image.message
+                    div.image(data-client="#{image.owner}")
 
+                        if(image.filteredUrl)
+                            img(src=image.filteredUrl )
+                        else
+                            img(src=image.formatedUrl)
+                        if(image.message)
+                            p
+                                !=image.message
+                    div.image(data-client="#{image.owner}")
+
+                        if(image.filteredUrl)
+                            img(src=image.filteredUrl )
+                        else
+                            img(src=image.formatedUrl)
+                        if(image.message)
+                            p
+                                !=image.message
+                    div.image(data-client="#{image.owner}")
+
+                        if(image.filteredUrl)
+                            img(src=image.filteredUrl )
+                        else
+                            img(src=image.formatedUrl)
+                        if(image.message)
+                            p
+                                !=image.message
+                    div.image(data-client="#{image.owner}")
+
+                        if(image.filteredUrl)
+                            img(src=image.filteredUrl )
+                        else
+                            img(src=image.formatedUrl)
+                        if(image.message)
+                            p
+                                !=image.message
+                    div.image(data-client="#{image.owner}")
+
+                        if(image.filteredUrl)
+                            img(src=image.filteredUrl )
+                        else
+                            img(src=image.formatedUrl)
+                        if(image.message)
+                            p
+                                !=image.message
+                    div.image(data-client="#{image.owner}")
+
+                        if(image.filteredUrl)
+                            img(src=image.filteredUrl )
+                        else
+                            img(src=image.formatedUrl)
+                        if(image.message)
+                            p
+                                !=image.message
+                    div.image(data-client="#{image.owner}")
+
+                        if(image.filteredUrl)
+                            img(src=image.filteredUrl )
+                        else
+                            img(src=image.formatedUrl)
+                        if(image.message)
+                            p
+                                !=image.message
+                    div.image(data-client="#{image.owner}")
+
+                        if(image.filteredUrl)
+                            img(src=image.filteredUrl )
+                        else
+                            img(src=image.formatedUrl)
+                        if(image.message)
+                            p
+                                !=image.message
 
         footer
             a(href='add') Participer!

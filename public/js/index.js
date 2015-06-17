@@ -28,8 +28,7 @@ $(function () {
     function calculateMarginX(x) {
         if (x < 0 && origin.left < Math.abs(x * defaultSize.width)) {
             margin.left = Math.abs(x * defaultSize.width) - origin.left;
-            $('#imageWall').css('margin-left', margin.left + "px")
-            img.addClass('lazy');
+            $('#imageWall').css('margin-left', margin.left + "px");
         }
 
     }
@@ -37,22 +36,21 @@ $(function () {
     function calculateMarginY(y) {
         if (y < 0 && origin.top < Math.abs(y * defaultSize.height)) {
             margin.top = Math.abs(y * defaultSize.height) - origin.top;
-            $('#imageWall').css('margin-top', margin.top + "px")
-            img.addClass('lazy');
+            $('#imageWall').css('margin-top', margin.top + "px");
         }
     }
 
 
 // fullscreen
-    var fullscreen=false;
+    var fullscreen = false;
     $('#fullscreen').on('click', function (e) {
         e.preventDefault();
-        if(!fullscreen){
+        if (!fullscreen) {
             launchIntoFullscreen(document.documentElement); // the whole page
-            fullscreen=true;
+            fullscreen = true;
             $(this).html('exit fullscreen');
-        }else{
-            fullscreen=false;
+        } else {
+            fullscreen = false;
             exitFullscreen();
             $(this).html('Fullscreen');
         }
@@ -68,16 +66,26 @@ $(function () {
             element.msRequestFullscreen();
         }
     }
+
     function exitFullscreen() {
-        if(document.exitFullscreen) {
+        if (document.exitFullscreen) {
             document.exitFullscreen();
-        } else if(document.mozCancelFullScreen) {
+        } else if (document.mozCancelFullScreen) {
             document.mozCancelFullScreen();
-        } else if(document.webkitExitFullscreen) {
+        } else if (document.webkitExitFullscreen) {
             document.webkitExitFullscreen();
         }
     }
 
+    $(window).scroll(function () {
+        $('.not').each(function () {
+
+            if ($(this).visible(true)) {
+                $(this).addClass('animate');
+            }
+        })
+
+    });
 
     // draggable wall
 
@@ -86,17 +94,34 @@ $(function () {
     $(window).load(function () {
 
         if (images.length) {
-            for (var i = 0; i <= images.length; i++) {
+            for (var i = 0; i <= images.length * 10; i++) {
                 img = $('#imageWall .image').eq(i);
                 if ((-width / 2 < x <= width / 2)
                     && (-height / 2 < y <= height / 2)) {
                     if (img.length) {
-                        img.css({
-                            left: origin.left + x * defaultSize.width + 'px',
-                            top: origin.top + y * defaultSize.height + 'px'
-                        }).delay(100 * i).queue(function () {
-                            $(this).addClass('animate');
-                        })
+                        //console.log(window.innerWidth/2);
+                        console.log(Math.abs(x + 1 * defaultSize.width));
+
+                        if (
+                            x + 1 < 0 && origin.left < Math.abs((x + 1) * defaultSize.width)
+                            || y + 1 < 0 && origin.top < Math.abs((y + 1) * defaultSize.height)
+                            || x + 1 > 0 && window.innerWidth / 2 < Math.abs(x * defaultSize.width)
+                            || y + 1 > 0 && window.innerHeight / 2 < Math.abs(y * defaultSize.height)
+
+                        ) {
+                            img.css({
+                                left: origin.left + x * defaultSize.width + 'px',
+                                top: origin.top + y * defaultSize.height + 'px'
+                            });
+                            img.addClass('not');
+                        } else {
+                            img.css({
+                                left: origin.left + x * defaultSize.width + 'px',
+                                top: origin.top + y * defaultSize.height + 'px'
+                            }).delay(100 * i).queue(function (x, y) {
+                                $(this).addClass('animate');
+                            });
+                        }
                     } else {
 
                         $("body").scrollTo({
@@ -114,8 +139,6 @@ $(function () {
                     delta = [-delta[1], delta[0]]
                 }
 
-                x += delta[0];
-                y += delta[1];
                 if (x > bodySize.maxX) {
                     bodySize.maxX = x;
                 }
@@ -124,12 +147,14 @@ $(function () {
                 }
                 if (x < bodySize.minX) {
                     bodySize.minX = x;
-                    calculateMarginX(x,img);
+                    calculateMarginX(x, img);
                 }
                 if (y < bodySize.minY) {
                     bodySize.minY = y;
-                    calculateMarginY(y,img);
+                    calculateMarginY(y, img);
                 }
+                x += delta[0];
+                y += delta[1];
             }
         }
     });
