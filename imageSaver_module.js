@@ -1,8 +1,7 @@
 var fs = require('fs');
 var gm = require('gm').subClass({imageMagick: true});
 var nameManager = require('./name_module');
-var i = require('./imageFormat_module');
-var imageFormat = new i();
+var imageFormat = require('./imageFormat_module');
 
 /** @module imageSaver */
 module.exports = {

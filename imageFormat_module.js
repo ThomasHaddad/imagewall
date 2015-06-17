@@ -3,9 +3,9 @@ var gm = require('gm').subClass({imageMagick: true});
 
 /** @module imageFormat */
 
-module.exports = function () {
+module.exports ={
 
-    var i = {
+
         /**
          * string
          */
@@ -42,7 +42,7 @@ module.exports = function () {
          * @string path
          */
         setDirectoryPath:function(path){
-            self.dirPath=path;
+            this.dirPath=path;
         },
         /**
          * Defines the futur image size and its ratio
@@ -50,9 +50,9 @@ module.exports = function () {
          * @param height - integer
          */
         setExpectedImageSize:function(width,height){
-            self.expectedImageSize.width=width;
-            self.expectedImageSize.height=height;
-            self.expectedImageSize.ratio=self.expectedImageSize.width/self.expectedImageSize.height;
+            this.expectedImageSize.width=width;
+            this.expectedImageSize.height=height;
+            this.expectedImageSize.ratio=this.expectedImageSize.width/this.expectedImageSize.height;
         },
         /**
          * Retrieves the current image size and expects a callback
@@ -61,7 +61,7 @@ module.exports = function () {
          * @param callback - function
          */
         getImageSize: function (imagePath, thanksApple, callback) {
-
+            var self = this;
                 gm(imagePath)
                     .size(function (err, data) {
 
@@ -90,6 +90,7 @@ module.exports = function () {
          * @param callback - function
          */
         cropImage: function (imagePath, newFileName,thanksApple, callback) {
+            var self = this;
             var newFilePath = self.dirPath + newFileName;
             //console.log('future formated filename : ' + newFileName);
             if(!thanksApple){
@@ -130,6 +131,7 @@ module.exports = function () {
          * @param newImageSize  - json
          */
         getCropValues: function (currentImageSize, newImageSize) {
+            var self = this;
             self.cropValues.x = (currentImageSize.width - newImageSize.width) / 2;
             self.cropValues.y = (currentImageSize.height - newImageSize.height) / 2;
         },
@@ -139,6 +141,7 @@ module.exports = function () {
          * @param expectedProps - json
          */
         getNewValues: function (currentProps, expectedProps) {
+            var self = this;
             if (currentProps.width > currentProps.height) {
                 self.newImageSize = {
                     width: expectedProps.ratio * currentProps.height,
@@ -160,6 +163,7 @@ module.exports = function () {
          * @param callback - function
          */
         setMonochromeImage: function (imagePath, filteredName, callback) {
+            var self = this;
             gm(imagePath)
                 .monochrome()
                 .write(self.dirPath + filteredName, function (err) {
@@ -174,6 +178,7 @@ module.exports = function () {
          * @param callback - function
          */
         setCharcoalImage: function (imagePath, filteredName, callback) {
+            var self = this;
             gm(imagePath)
                 .charcoal(1)
                 .write(self.dirPath + filteredName, function (err) {
@@ -188,6 +193,7 @@ module.exports = function () {
          * @param callback - function
          */
         setLowColorImage: function (imagePath, filteredName, callback) {
+            var self= this;
             gm(imagePath)
                 .colors(8)
                 .write(self.dirPath + filteredName, function (err) {
@@ -202,6 +208,7 @@ module.exports = function () {
          * @param callback - function
          */
         setNegativeImage: function (imagePath, filteredName, callback) {
+            var self= this;
             gm(imagePath)
                 .negative()
                 .write(self.dirPath + filteredName, function (err) {
@@ -216,6 +223,7 @@ module.exports = function () {
          * @param callback - function
          */
         setSepiaImage: function (imagePath, filteredName, callback) {
+            var self= this;
             gm(imagePath)
                 .sepia()
                 .write(self.dirPath + filteredName, function (err) {
@@ -230,6 +238,7 @@ module.exports = function () {
          * @param callback - function
          */
         setColorizedImage: function (imagePath, filteredName, callback) {
+            var self= this;
             gm(imagePath)
                 .colorize(200, 200, 256)
                 .write(self.dirPath + filteredName, function (err) {
@@ -237,7 +246,6 @@ module.exports = function () {
                     callback()
                 });
         }
-    };
-    var self = i;
-    return i;
+
+
 };
