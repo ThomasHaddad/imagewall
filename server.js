@@ -1,3 +1,4 @@
+'use strict';
 var express = require('express');
 var app = express();
 
@@ -11,15 +12,20 @@ var bodyParser = require('body-parser');
 var multer = require('multer');
 var cookieParser = require('cookie-parser');
 var async = require('async');
-var dirPath = './public/uploads/';
 var i = require('./image_module');
 var imageManager = new i();
-var gm = require('gm').subClass({imageMagick: true});
 
+var gm = require('gm').subClass({imageMagick: true});
 //configuring imageManager
 imageManager.dirPath = './public/uploads/';
 imageManager.expectedImageSize.ratio = imageManager.expectedImageSize.width / imageManager.expectedImageSize.height;
 
+var nameManager = require('./name_module');
+//configuring nameManager
+nameManager.setRawExtension('-r');
+nameManager.setFormatedExtension('-f');
+nameManager.setFilteredExtension('-m');
+nameManager.setDirectory('/uploads/');
 
 //Configuring modules
 app.set('view engine', 'jade');
@@ -30,7 +36,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 
 
-// database connection
+// CONFIG DEV
+app.set('port','9000');
 mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
     if (error) {
         console.log(error);
@@ -38,7 +45,7 @@ mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
 });
 // CONFIG PROD
 //app.set('host', '167.114.240.87');
-//app.set('port', 9000);
+//app.set('port', 80);
 //
 //// database connection
 //mongoose.connect('mongodb://127.0.0.1:27017/imagewall', function (error) {
@@ -57,11 +64,8 @@ var ImageSchema = new Schema({
     filteredUrl: String,
     filterType: String,
     contentType: String,
-    position: {}, // to be determined
     owner: {type: Schema.ObjectId, ref: "User"},
-    score: Number, // to be determined
-    message: String,
-    font: String
+    message: String
 });
 
 var UserSchema = mongoose.Schema({
@@ -73,21 +77,14 @@ var Image = mongoose.model('images', ImageSchema);
 var User = mongoose.model('users', UserSchema);
 
 
-// Socket connection
-io.on('connection', function (socket) {
-    console.log('a user connected');
-    socket.on('disconnect', function () {
-        console.log('user disconnected');
-    });
-});
-
 
 // URLS management
 app.get('/',function(req,res){
     res.render('index', {title: 'Home'});
 });
-app.get('/imagewall', function (req, res) {
-    console.log(req.cookies.user);
+
+
+app.get('/show-wall', function (req, res) {
     Image.find({}, function (err, docs) {
         if (!err) {
         } else {
@@ -102,14 +99,10 @@ app.get('/imagewall', function (req, res) {
 });
 
 app.get('/add', function (req, res) {
-    var imageData = {},
-        user,
-        newUser;
+    var newUser;
     User.findById(req.cookies.user, function (err, user) {
-        //console.log("Current user: " + user);
         if (err) throw err;
         if (user) {
-            //console.log(user._id);
             Image.findOne({owner: user._id}, function (err, img) {
                 //console.log("User image : " + img);
                 if (err) throw err;
@@ -126,7 +119,6 @@ app.get('/add', function (req, res) {
             newUser = new User;
             newUser.save(function (err, user) {
                 if (err) throw err;
-                //console.log("new user: " + user);
                 res.cookie('user', user._id, {httpOnly: false});
                 res.render('addImage', {title: 'add', message: 'Add an image'});
             });
@@ -134,33 +126,10 @@ app.get('/add', function (req, res) {
     });
 });
 
-//externaliser ça
-
-function getRawName(name) {
-    return name.split('.')[0] + '-r.' + name.split('.')[1];
-}
-function getFormatedName(name) {
-    return name.split('.')[0] + '-f.' + name.split('.')[1];
-}
-function getFilteredName(name) {
-    return name.split('.')[0] + '-m.' + name.split('.')[1];
-}
-function setRawUrl(baseUrl, name) {
-    return baseUrl + "/uploads/" + name.split('.')[0] + '-r.' + name.split('.')[1];
-}
-function setFormatedUrl(baseUrl, name) {
-    return baseUrl + "/uploads/" + name.split('.')[0] + '-f.' + name.split('.')[1];
-}
-function setFilteredUrl(baseUrl, name) {
-    return baseUrl + "/uploads/" + name.split('.')[0] + '-m.' + name.split('.')[1];
-}
-
-
 app.post('/upload', function (req, res) {
     var baseUrl = req.protocol + '://' + req.get('host');
     var tempPath = req.files.image.path;
     var thanksApple = false;
-    console.log(tempPath);
     if (req.files.image.mimetype.indexOf('image') == -1) {
         res.json('Only images are accepted');
         res.end();
@@ -168,7 +137,6 @@ app.post('/upload', function (req, res) {
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
-            console.log('01');
             fs.readFile(tempPath, function (err, data) {
                 if (err) throw err;
                 async.parallel([
@@ -180,16 +148,16 @@ app.post('/upload', function (req, res) {
                                 if (data.Properties['exif:Make'] == "Apple") {
                                     this
                                         .autoOrient()
-                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                            fs.unlink(dirPath + getRawName(img.name), function (err) {
+                                        .write(imageManager.dirPath + nameManager.getRawName(req.files.image.name), function (err) {
+                                            fs.unlink(imageManager.dirPath + nameManager.getRawName(img.name), function (err) {
                                                 if (err) throw err;
                                                 callback(err, data);
                                             });
                                         });
                                 }else{
                                     this
-                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
-                                            fs.unlink(dirPath + getRawName(img.name), function (err) {
+                                        .write(imageManager.dirPath + nameManager.getRawName(req.files.image.name), function (err) {
+                                            fs.unlink(imageManager.dirPath + nameManager.getRawName(img.name), function (err) {
                                                 if (err) throw err;
                                                 callback(err, data);
                                             });
@@ -206,11 +174,11 @@ app.post('/upload', function (req, res) {
                                     thanksApple = true;
                                 }
                                 imageManager.getImageSize(tempPath, thanksApple, function () {
-                                    imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), thanksApple, function (newFilePath) {
+                                    imageManager.cropImage(tempPath, nameManager.getFormatedName(req.files.image.name), thanksApple, function (newFilePath) {
                                         imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function (newFilePath) {
                                             gm(newFilePath)
-                                                .write(dirPath + getFormatedName(req.files.image.name), function (err) {
-                                                    fs.unlink(dirPath + getFormatedName(img.name), function (err) {
+                                                .write(imageManager.dirPath + nameManager.getFormatedName(req.files.image.name), function (err) {
+                                                    fs.unlink(imageManager.dirPath + nameManager.getFormatedName(img.name), function (err) {
                                                         if (err) throw err;
                                                         callback(err, data);
                                                     });
@@ -226,8 +194,8 @@ app.post('/upload', function (req, res) {
                         if (err) throw err;
                         img.name = req.files.image.name;
                         img.contentType = req.files.image.mimetype;
-                        img.rawUrl = setRawUrl(baseUrl, img.name);
-                        img.formatedUrl = setFormatedUrl(baseUrl, img.name);
+                        img.rawUrl = nameManager.setRawUrl(baseUrl, img.name);
+                        img.formatedUrl = nameManager.setFormatedUrl(baseUrl, img.name);
                         img.filteredUrl = null;
                         img.filterType = null;
 
@@ -253,12 +221,12 @@ app.post('/upload', function (req, res) {
                                 if (data.Properties['exif:Make'] == "Apple") {
                                     this
                                         .autoOrient()
-                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                        .write(imageManager.dirPath + nameManager.getRawName(req.files.image.name), function (err) {
                                             callback(err, data);
                                         });
                                 }else{
                                     this
-                                        .write(dirPath + getRawName(req.files.image.name), function (err) {
+                                        .write(imageManager.dirPath + nameManager.getRawName(req.files.image.name), function (err) {
                                             callback(err, data);
                                         });
                                 }
@@ -273,7 +241,7 @@ app.post('/upload', function (req, res) {
                                     thanksApple = true;
                                 }
                                 imageManager.getImageSize(tempPath, thanksApple, function () {
-                                    imageManager.cropImage(tempPath, getFormatedName(req.files.image.name), thanksApple, function (newFilePath) {
+                                    imageManager.cropImage(tempPath, nameManager.getFormatedName(req.files.image.name), thanksApple, function (newFilePath) {
                                         imageManager.resizeImage(newFilePath, imageManager.expectedImageSize, function () {
                                             callback(err, data);
                                         });
@@ -289,8 +257,8 @@ app.post('/upload', function (req, res) {
                         if (err) throw err;
                         var image = new Image;
                         image.name = req.files.image.name;
-                        image.rawUrl = setRawUrl(baseUrl, image.name);
-                        image.formatedUrl = setFormatedUrl(baseUrl, image.name);
+                        image.rawUrl = nameManager.setRawUrl(baseUrl, image.name);
+                        image.formatedUrl = nameManager.setFormatedUrl(baseUrl, image.name);
                         image.contentType = req.files.image.mimetype;
                         image.owner = req.cookies.user;
                         image.filterType = null;
@@ -316,10 +284,10 @@ app.post('/filterImage', function (req, res) {
         if (img) {
 
             if (req.body.value != 'Default') {
-                imageManager['set' + req.body.value + 'Image'](dirPath + getFormatedName(img.name), getFilteredName(img.name), function (err, data) {
+                imageManager['set' + req.body.value + 'Image'](imageManager.dirPath + nameManager.getFormatedName(img.name), nameManager.getFilteredName(img.name), function (err, data) {
                     if (err) throw err;
 
-                    img.filteredUrl = setFilteredUrl(baseUrl, img.name);
+                    img.filteredUrl = nameManager.setFilteredUrl(baseUrl, img.name);
                     img.filterType = req.body.value;
                     img.save(function (err, image) {
                         if (err) throw err;
@@ -328,7 +296,7 @@ app.post('/filterImage', function (req, res) {
                     });
                 });
             } else {
-                fs.unlink(dirPath + getFilteredName(img.name), function (err) {
+                fs.unlink(imageManager.dirPath + nameManager.getFilteredName(img.name), function (err) {
                     img.filteredUrl = null;
                     img.filterType = null;
                     img.save(function (err, image) {
@@ -341,8 +309,8 @@ app.post('/filterImage', function (req, res) {
         }
     });
 });
-app.post('/addMessage', function (req, res) {
-    var baseUrl = req.protocol + '://' + req.get('host');
+
+app.post('/sendMessage', function (req, res) {
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
@@ -355,12 +323,13 @@ app.post('/addMessage', function (req, res) {
         }
     });
 });
+
 app.get('/clear', function (req, res) {
     // Delete all the uploaded files
-    fs.readdir(dirPath, function (err, files) {
+    fs.readdir(imageManager.dirPath, function (err, files) {
         if (err) throw err;
         files.forEach(function (file) {
-            fs.unlink(dirPath + file, function () {
+            fs.unlink(imageManager.dirPath + file, function () {
                 if (err) throw err;
                 console.log('file sucessfully deleted');
             });
@@ -375,9 +344,8 @@ app.get('/clear', function (req, res) {
         });
     });
 });
-http.listen(9000, function () {
-    console.log('listening on *:80');
+
+http.listen(app.get('port'), function () {
+    console.log('listening on *:'+app.get('port'));
 });
-/**
- * Created by thomashaddad on 08/06/15.
- */
+

@@ -42,20 +42,11 @@ $(function () {
 
 
     // draggable wall
-    $('#imageWall').draggable({
-        helper: function () {
 
-            return $('<div></div>').css('opacity', 0);
-        },
-        drag: function (event, ui) {
 
-            var p = ui.helper.position();
-            $(this).stop().animate({
-                top: p.top,
-                left: p.left
-            }, 750, 'easeOutCirc');
-        }
-    });
+
+
+
     // Draw spiral when images are loaded
     $(window).load(function () {
 
@@ -140,8 +131,7 @@ $(function () {
                 $('#imageWall').append('<div class="image" data-client="' + data.client + '"><img src=' + data.image + '><p></p></div> ')
                 $('#imageWall .image[data-client="' + data.client + '"] img').load(function () {
 
-                    if ((-width / 2 < x <= width / 2)
-                        && (-height / 2 < y <= height / 2)) {
+                    if ((-width / 2 < x <= width / 2) && (-height / 2 < y <= height / 2)) {
                         calculateMargin(x, y);
                         $(this).parent().css({
                             left: origin.left + x * defaultSize.width + 'px',
@@ -151,15 +141,14 @@ $(function () {
                         $(this).unbind('load');
                     }
 
-                    if (x === y
-                        || (x < 0 && x === -y)
-                        || (x > 0 && x === 1 - y)) {
+                    if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
                         // change direction
                         delta = [-delta[1], delta[0]]
                     }
 
                     x += delta[0];
                     y += delta[1];
+
                     if (x > bodySize.maxX) {
                         bodySize.maxX = x;
                     }
@@ -186,6 +175,7 @@ $(function () {
             $('#locate').show();
         }
     });
+
     socket.on('imageFiltered', function (data) {
         $('#imageWall .image[data-client="' + data.client + '"]').removeClass('animate')
         setTimeout(function () {

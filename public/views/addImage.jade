@@ -2,7 +2,7 @@ html
     head
         title  ImageWall |
             != title
-        script(src="/js/jquery.js")
+        script(src="/vendors/jquery.js")
         link(rel='stylesheet', href='/css/styles2.css')
     body
         h1!= message
@@ -32,80 +32,80 @@ html
         var image = !{JSON.stringify(image)}
 
 
-        console.log(image);
         $(function(){
             if($('img').attr('src')==''){
                 $('img,select,#message').hide();
             }
-        })
-        $('form').submit(function(e){
-            var $form = $(this);
-            var formdata = (window.FormData) ? new FormData($form[0]) : null;
-            var data = (formdata !== null) ? formdata : $form.serialize();
-            e.preventDefault();
-            $.ajax({
-                url: '/upload',
-                type: 'POST',
-                contentType: false, // obligatoire pour de l'upload
-                processData: false, // obligatoire pour de l'upload
-                dataType: 'json', // selon le retour attendu
-                data: data,
-                beforeSend:function(){
-                    $('#submit').hide();
-                },
-                success: function (result) {
-                    $('img').attr('src',result+'?i='+Date.now());
-                    if($('img').css('display')=='none'){
-                        $('img').show();
-                    }
-                    $('#submit,select,#message').show();
-                    $('select').val('Default').attr('selected', 'selected');
-                }
-            });
-        })
-        //select the good option and set message on page load
-        if(image){
-            if(image.filterType){
-                $('select').val(image.filterType).attr('selected','selected');
-            }else{
-                $('select').val('Default').attr('selected','selected')
-            }
-            if(image.message){
-                $('#message').val(image.message);
-            }
-        }
-        //ajax on select
-        $('select').on('change',function(){
-            console.log($(this).val())
-            var self = $(this);
-            $.ajax({
-                url: '/filterImage',
-                type: 'POST',
-                data: {
-                    value:self.val()
-                },
-                beforeSend:function(){
-                    $('select').hide();
-                },
-                success: function (result) {
-                    $('img').attr('src',result+'?i='+Date.now());
-                    $('select').show();
-                }
-            });
-        });
 
-        //ajax message change
-        $('#message').on('keyup',function(){
-            console.log($(this).val())
-            var self = $(this);
-            $.ajax({
-                url: '/addMessage',
-                type: 'POST',
-                data: {
-                    value:self.val().trim().split(/[\s,]+/)[0].substring(0,10)
-                },
-                success: function (result) {
-                    console.log(result);
+            $('form').submit(function(e){
+                var $form = $(this);
+                var formdata = (window.FormData) ? new FormData($form[0]) : null;
+                var data = (formdata !== null) ? formdata : $form.serialize();
+                e.preventDefault();
+                $.ajax({
+                    url: '/upload',
+                    type: 'POST',
+                    contentType: false, // obligatoire pour de l'upload
+                    processData: false, // obligatoire pour de l'upload
+                    dataType: 'json', // selon le retour attendu
+                    data: data,
+                    beforeSend:function(){
+                        $('#submit').hide();
+                    },
+                    success: function (result) {
+                        $('img').attr('src',result+'?i='+Date.now());
+                        if($('img').css('display')=='none'){
+                            $('img').show();
+                        }
+                        $('#submit,select,#message').show();
+                        $('select').val('Default').attr('selected', 'selected');
+                    }
+                });
+            })
+            //select the good option and set message on page load
+            if(image){
+                if(image.filterType){
+                    $('select').val(image.filterType).attr('selected','selected');
+                }else{
+                    $('select').val('Default').attr('selected','selected')
                 }
+                if(image.message){
+                    $('#message').val(image.message);
+                }
+            }
+            //ajax on select
+            $('select').on('change',function(){
+                console.log($(this).val())
+                var self = $(this);
+                $.ajax({
+                    url: '/filterImage',
+                    type: 'POST',
+                    data: {
+                        value:self.val()
+                    },
+                    beforeSend:function(){
+                        $('select').hide();
+                    },
+                    success: function (result) {
+                        $('img').attr('src',result+'?i='+Date.now());
+                        $('select').show();
+                    }
+                });
             });
-        });
+
+            //ajax message change
+            $('#message').on('keyup',function(){
+                console.log($(this).val())
+                var self = $(this);
+                $.ajax({
+                    url: '/sendMessage',
+                    type: 'POST',
+                    data: {
+                        value:self.val().trim().split(/[\s,]+/)[0].substring(0,10)
+                    },
+                    success: function (result) {
+                        console.log(result);
+                    }
+                });
+            });
+        })
