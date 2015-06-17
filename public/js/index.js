@@ -94,7 +94,7 @@ $(function () {
     $(window).load(function () {
 
         if (images.length) {
-            for (var i = 0; i <= images.length * 10; i++) {
+            for (var i = 0; i <= images.length; i++) {
                 img = $('#imageWall .image').eq(i);
                 if ((-width / 2 < x <= width / 2)
                     && (-height / 2 < y <= height / 2)) {
