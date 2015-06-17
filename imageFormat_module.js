@@ -46,8 +46,8 @@ module.exports ={
         },
         /**
          * Defines the futur image size and its ratio
-         * @param width - integer
-         * @param height - integer
+         * @integer width
+         * @integer height
          */
         setExpectedImageSize:function(width,height){
             this.expectedImageSize.width=width;
@@ -56,16 +56,15 @@ module.exports ={
         },
         /**
          * Retrieves the current image size and expects a callback
-         * @param imagePath - string
-         * @param thanksApple - boolean
-         * @param callback - function
+         * @string imagePath
+         * @boolean thanksApple
+         * @function callback
          */
         getImageSize: function (imagePath, thanksApple, callback) {
             var self = this;
                 gm(imagePath)
                     .size(function (err, data) {
 
-                        console.log(data);
                         if(!thanksApple){
                             self.currentImageSize.width = data.width;
                             self.currentImageSize.height = data.height;
@@ -84,15 +83,14 @@ module.exports ={
         },
         /**
          * Crops the image, saves a new image and expects a callback
-         * @param imagePath - string
-         * @param newFileName - string
-         * @param thanksApple - boolean
-         * @param callback - function
+         * @string imagePath
+         * @string newFileName
+         * @boolean thanksApple
+         * @function callback
          */
         cropImage: function (imagePath, newFileName,thanksApple, callback) {
             var self = this;
             var newFilePath = self.dirPath + newFileName;
-            //console.log('future formated filename : ' + newFileName);
             if(!thanksApple){
                 gm(imagePath)
                     .crop(self.newImageSize.width, self.newImageSize.height, self.cropValues.x, self.cropValues.y)
@@ -102,7 +100,6 @@ module.exports ={
                     });
             }else{
                 gm(imagePath)
-                    //.rotate("white",90)
                     .crop(self.newImageSize.height, self.newImageSize.width, self.cropValues.y, self.cropValues.x)
                     .autoOrient()
                     .write(newFilePath, function (err) {
@@ -113,9 +110,9 @@ module.exports ={
         },
         /**
          * Resizes the image,overwrites it, and expects a callback
-         * @param fileName - string
-         * @param expectedImageSize - string
-         * @param callback - function
+         * @string fileName
+         * @string expectedImageSize
+         * @function callback
          */
         resizeImage: function (fileName, expectedImageSize, callback) {
             gm(fileName)
@@ -127,8 +124,8 @@ module.exports ={
         },
         /**
          * Retrieves the crop values to keep a correct ratio
-         * @param currentImageSize - json
-         * @param newImageSize  - json
+         * @object currentImageSize - width and height
+         * @object newImageSize  - width and height
          */
         getCropValues: function (currentImageSize, newImageSize) {
             var self = this;
@@ -137,8 +134,8 @@ module.exports ={
         },
         /**
          * Defines newImageSize
-         * @param currentProps - json
-         * @param expectedProps - json
+         * @object currentProps
+         * @object expectedProps
          */
         getNewValues: function (currentProps, expectedProps) {
             var self = this;
@@ -158,9 +155,9 @@ module.exports ={
 
         /**
          * Monochrome filter and overwrites image
-         * @param imagePath - string
-         * @param filteredName - string
-         * @param callback - function
+         * @string imagePath
+         * @string filteredName
+         * @function callback
          */
         setMonochromeImage: function (imagePath, filteredName, callback) {
             var self = this;
@@ -173,9 +170,9 @@ module.exports ={
         },
         /**
          * Charcoal filter and overwrites image
-         * @param imagePath - string
-         * @param filteredName - string
-         * @param callback - function
+         * @string imagePath
+         * @string filteredName
+         * @function callback
          */
         setCharcoalImage: function (imagePath, filteredName, callback) {
             var self = this;
@@ -188,9 +185,9 @@ module.exports ={
         },
         /**
          * LowColor filter and overwrites image
-         * @param imagePath - string
-         * @param filteredName - string
-         * @param callback - function
+         * @string imagePath
+         * @string filteredName
+         * @function callback
          */
         setLowColorImage: function (imagePath, filteredName, callback) {
             var self= this;
@@ -203,9 +200,9 @@ module.exports ={
         },
         /**
          * Negative filter and overwrites image
-         * @param imagePath - string
-         * @param filteredName - string
-         * @param callback - function
+         * @string imagePath
+         * @string filteredName
+         * @function callback
          */
         setNegativeImage: function (imagePath, filteredName, callback) {
             var self= this;
@@ -218,9 +215,9 @@ module.exports ={
         },
         /**
          * Sepia filter and overwrites image
-         * @param imagePath - string
-         * @param filteredName - string
-         * @param callback - function
+         * @string imagePath
+         * @string filteredName
+         * @function callback
          */
         setSepiaImage: function (imagePath, filteredName, callback) {
             var self= this;
@@ -233,9 +230,9 @@ module.exports ={
         },
         /**
          * Colorized filter and overwrites image
-         * @param imagePath - string
-         * @param filteredName - string
-         * @param callback - function
+         * @string imagePath
+         * @string filteredName
+         * @function callback
          */
         setColorizedImage: function (imagePath, filteredName, callback) {
             var self= this;

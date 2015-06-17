@@ -112,7 +112,6 @@ app.get('/add', function (req, res) {
         if (err) throw err;
         if (user) {
             Image.findOne({owner: user._id}, function (err, img) {
-                //console.log("User image : " + img);
                 if (err) throw err;
 
                 if (img) {

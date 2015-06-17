@@ -26,9 +26,9 @@ module.exports = {
     },
     /**
      * create a new raw image and delete the previous one
-     * @param request - json
-     * @param currentImage - string
-     * @param callback - function
+     * @object request
+     * @string currentImage
+     * @function callback
      */
     overwriteRawImage: function (request, currentImage, callback) {
         var self = this;
@@ -57,9 +57,9 @@ module.exports = {
     },
     /**
      * create a new formated image and delete the previous one
-     * @param request - json
-     * @param currentImage - string
-     * @param callback - function
+     * @object request
+     * @string currentImage
+     * @function callback
      */
     overwriteFormatedImage: function (request, currentImage, callback) {
         var self = this;
@@ -87,8 +87,8 @@ module.exports = {
     },
     /**
      * create a new raw image
-     * @param request - json
-     * @param callback - function
+     * @object request
+     * @function callback
      */
     saveNewRawImage: function (request, callback) {
         var self = this;
@@ -113,8 +113,8 @@ module.exports = {
     },
     /**
      * create a new formated image
-     * @param request - json
-     * @param callback - function
+     * @object request
+     * @function callback
      */
     saveNewFormatedImage: function (request, callback) {
         var self = this;

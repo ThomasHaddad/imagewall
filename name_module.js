@@ -24,7 +24,7 @@ module.exports = {
 
     /**
      * Defines url of the image (http://...) using req as parameter
-     * @param request - json
+     * @object request
      */
     setBaseUrl: function (request) {
         this.baseUrl = request.protocol + '://' + request.get('host');
@@ -38,7 +38,7 @@ module.exports = {
     },
     /**
      *
-     * @param dirName
+     * @string dirName
      */
     setDirectory: function (dirName) {
         this.directory = dirName;
@@ -52,21 +52,21 @@ module.exports = {
     },
     /**
      *
-     * @param arg
+     * @string arg
      */
     setRawExtension: function (arg) {
         this.rawExtension = arg;
     },
     /**
      *
-     * @param arg
+     * @string arg
      */
     setFormatedExtension: function (arg) {
         this.formatedExtension = arg;
     },
     /**
      *
-     * @param arg
+     * @string arg
      */
     setFilteredExtension: function (arg) {
         this.filteredExtension = arg;
@@ -94,7 +94,7 @@ module.exports = {
     },
     /**
      *
-     * @param name - string
+     * @string name
      * @returns {string}
      */
     getRawName: function (name) {
@@ -102,7 +102,7 @@ module.exports = {
     },
     /**
      *
-     * @param name - string
+     * @string name
      * @returns {string}
      */
     getFormatedName: function (name) {
@@ -110,7 +110,7 @@ module.exports = {
     },
     /**
      *
-     * @param name - string
+     * @string name
      * @returns {string}
      */
     getFilteredName: function (name) {
@@ -118,8 +118,8 @@ module.exports = {
     },
     /**
      *
-     * @param request - json
-     * @param name - string
+     * @object request
+     * @string name
      * @returns {string}
      */
     setRawUrl: function (request, name) {
@@ -128,8 +128,8 @@ module.exports = {
     },
     /**
      *
-     * @param request - json
-     * @param name - string
+     * @object request
+     * @string name
      * @returns {string}
      */
     setFormatedUrl: function (request, name) {
@@ -138,8 +138,8 @@ module.exports = {
     },
     /**
      *
-     * @param request - json
-     * @param name - string
+     * @object request
+     * @string name
      * @returns {string}
      */
     setFilteredUrl: function (request, name) {
