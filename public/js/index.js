@@ -217,11 +217,11 @@ $(function () {
                     }
                     if (x < bodySize.minX) {
                         bodySize.minX = x;
-                        calculateMarginX(x);
+                        calculateMarginX(x,img);
                     }
                     if (y < bodySize.minY) {
                         bodySize.minY = y;
-                        calculateMarginY(y);
+                        calculateMarginY(y,img);
                     }
                 })
             } else {
