@@ -92,3 +92,5 @@ imageSaver.imageFormat.setSepiaImage(imageSaver.imageFormat.dirPath + imageSaver
 	// your callback
 });
 ```
+
+The whole documentation is available on this link : http://thomas-haddad.com/imageManager/
