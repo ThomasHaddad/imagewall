@@ -99,8 +99,6 @@ $(function () {
                 if ((-width / 2 < x <= width / 2)
                     && (-height / 2 < y <= height / 2)) {
                     if (img.length) {
-                        //console.log(window.innerWidth/2);
-                        console.log(Math.abs(x + 1 * defaultSize.width));
 
                         if (
                             x + 1 < 0 && origin.left < Math.abs((x + 1) * defaultSize.width)
@@ -192,7 +190,6 @@ $(function () {
                 $('#imageWall .image[data-client="' + data.client + '"] img').load(function () {
 
                     if ((-width / 2 < x <= width / 2) && (-height / 2 < y <= height / 2)) {
-                        calculateMargin(x, y);
                         $(this).parent().css({
                             left: origin.left + x * defaultSize.width + 'px',
                             top: origin.top + y * defaultSize.height + 'px'
