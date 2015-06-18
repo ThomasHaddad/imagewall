@@ -186,7 +186,7 @@ $(function () {
         if (data.image) {
 
             if ($('#imageWall .image[data-client="' + data.client + '"]').length == 0) {
-                $('#imageWall').append('<div class="image" data-client="' + data.client + '"><img src=' + data.image + '><p></p></div> ')
+                $('#imageWall').append('<div class="image" data-self="true" data-client="' + data.client + '"><img src=' + data.image + '><p></p></div> ')
                 $('#imageWall .image[data-client="' + data.client + '"] img').load(function () {
 
                     if ((-width / 2 < x <= width / 2) && (-height / 2 < y <= height / 2)) {
