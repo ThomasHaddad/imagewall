@@ -101,7 +101,7 @@ app.get('/show-wall', function (req, res) {
         if(req.cookies.user){
             res.render('wall', {title: 'Wall', message: 'Image Wall', images: docs, client:req.cookies.user});
         }else{
-            res.render('wall', {title: 'Wall', message: 'Image Wall', images: docs});
+            res.render('wall', {title: 'Wall', message: 'Image Wall', images: docs, client:false});
         }
     });
 });
