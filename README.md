@@ -13,10 +13,10 @@ imageSaver is written on top of `gm`(https://github.com/aheckmann/gm) for maximu
 #### Usage
 
 ```js
-var express = require('express')
+var express = require('express');
 var imageSaver = require('./imageSaver_module');
 
-var app = express()
+var app = express();
 
 ```
 
