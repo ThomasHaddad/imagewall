@@ -6,7 +6,7 @@ html
         script(src="/vendors/jquery.js")
         link(rel='stylesheet', href='/css/font.css')
         link(rel='stylesheet', href='/css/reset.css')
-        link(rel='stylesheet', href='/css/styles.css')
+        link(rel='stylesheet', href='/css/styles2.css')
     body
         div#image-handler
             div.container
@@ -68,7 +68,7 @@ html
 
         $(function(){
             if($('img').attr('src')==''){
-                $('img,select,#message').hide();
+                $('img,.styled-select,#message').hide();
             }
 
             $('form').submit(function(e){
@@ -91,7 +91,7 @@ html
                         if($('img').css('display')=='none'){
                             $('img').show();
                         }
-                        $('#submit,select,#message').show();
+                        $('#submit,.styled-select,#message').show();
                         $('select').val('None').attr('selected', 'selected');
                     }
                 });
@@ -118,11 +118,11 @@ html
                         value:self.val()
                     },
                     beforeSend:function(){
-                        $('select,#message').hide();
+                        $('.styled-select,#message').hide();
                     },
                     success: function (result) {
                         $('img').attr('src',result+'?i='+Date.now());
-                        $('select,#message').show();
+                        $('.styled-select,#message').show();
                     }
                 });
             });
