@@ -253,26 +253,26 @@ app.post('/sendMessage', function (req, res) {
     });
 });
 
-app.get('/clear', function (req, res) {
-    // Delete all the uploaded files
-    fs.readdir(imageSaver.imageFormat.dirPath, function (err, files) {
-        if (err) throw err;
-        files.forEach(function (file) {
-            fs.unlink(imageSaver.imageFormat.dirPath + file, function () {
-                if (err) throw err;
-                console.log('file sucessfully deleted');
-            });
-        })
-    });
-
-    // clears database
-    User.remove({}, function () {
-        Image.remove({}, function () {
-            res.clearCookie('user');
-            res.redirect('/');
-        });
-    });
-});
+//app.get('/clear', function (req, res) {
+//    // Delete all the uploaded files
+//    fs.readdir(imageSaver.imageFormat.dirPath, function (err, files) {
+//        if (err) throw err;
+//        files.forEach(function (file) {
+//            fs.unlink(imageSaver.imageFormat.dirPath + file, function () {
+//                if (err) throw err;
+//                console.log('file sucessfully deleted');
+//            });
+//        })
+//    });
+//
+//    // clears database
+//    User.remove({}, function () {
+//        Image.remove({}, function () {
+//            res.clearCookie('user');
+//            res.redirect('/');
+//        });
+//    });
+//});
 
 http.listen(app.get('port'), function () {
     console.log('listening on *:'+app.get('port'));
