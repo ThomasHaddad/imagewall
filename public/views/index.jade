@@ -1,5 +1,8 @@
 html
     head
+
+        link(rel='stylesheet', href='/css/font.css')
+        link(rel='stylesheet', href='/css/reset.css')
         link(rel='stylesheet', href='/css/index.css')
         script(src="/js/jquery.js")
 
@@ -8,7 +11,11 @@ html
     body
         div#wrapper
             header
-                h1 Imagewall
+                h1.
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="310.465px" height="302px" viewBox="0 0 310.465 302" enable-background="new 0 0 310.465 302" xml:space="preserve"><rect y="102.889" fill="none" width="310.465" height="111.628"/><text transform="matrix(1 0 0 1 65.54 135.064)"><tspan x="0" y="0" fill="#FFFFFF" font-family="'Lovelo-Black'" font-size="45">Instant </tspan><tspan x="32.366" y="51" fill="#FFFFFF" font-family="'Lovelo-Black'" font-size="45">Wall</tspan></text><polyline fill="none" stroke="#FFFFFF" stroke-width="10" stroke-miterlimit="10" points="264.14,55.742 264.14,255.32 45.499,255.32 45.499,36.679 177.14,36.679 "/></svg>
+
+                div#description
+                    p Réalisation collaborative d'un mur de photos mis à jour en temps réel
             div#choice
                 a(id="wall" href='show-wall') Voir le mur
                 a(href='add') Participer

@@ -48,11 +48,11 @@ $(function () {
         if (!fullscreen) {
             launchIntoFullscreen(document.documentElement); // the whole page
             fullscreen = true;
-            $(this).html('exit fullscreen');
+            $(this).html('Quitter le plein écran');
         } else {
             fullscreen = false;
             exitFullscreen();
-            $(this).html('Fullscreen');
+            $(this).html('Plein Ecran');
         }
     });
     function launchIntoFullscreen(element) {
@@ -159,11 +159,11 @@ $(function () {
 
     // hide if no pictures were updated yet
     if (!client) {
-        $('#locate').hide();
+        $('.locate').hide();
     }
 
     // Locate button
-    $('#locate').on('click', function (e) {
+    $('.locate').on('click', function (e) {
         var ownImage = $(".image[data-self='true']");
         e.preventDefault();
 
@@ -229,7 +229,7 @@ $(function () {
                 }, 150);
 
             }
-            $('#locate').show();
+            $('.locate').show();
         }
     });
 

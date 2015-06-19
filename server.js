@@ -115,9 +115,9 @@ app.get('/add', function (req, res) {
                 if (err) throw err;
 
                 if (img) {
-                    res.render('addImage', {title: 'add', message: 'Change your image', image: img});
+                    res.render('addImage', {title: 'add', message: 'CHANGEZ VOTRE IMAGE', image: img});
                 } else {
-                    res.render('addImage', {title: 'add', message: 'Add an image'});
+                    res.render('addImage', {title: 'add', message: 'CHARGER UNE IMAGE'});
 
                 }
 

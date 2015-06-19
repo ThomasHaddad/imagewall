@@ -6,6 +6,7 @@ body{
     font-family: Arial, sans-serif;
     height: 100%;
     width:100%;
+    font-size: 62.5%;
 }
 
 #imageWall{
@@ -72,16 +73,36 @@ body{
 
 }
 
+
 footer{
     position:fixed;
     width: 100%;
     bottom:0;
     left:0;
-    background-color: darkred;
     z-index: 100;
     text-align: center;
 }
-footer a{
+footer #footer-desktop{
+    background-color: #a52228;
+}
+footer #footer-desktop, footer #footer-mobile{
+    position: relative;
+}
+footer #footer-desktop .logo svg{
+    position: absolute;
+    left:5px;
+    top:3px;
+    width:40px;
+    height:40px;
+}
+footer #footer-desktop ul li, footer #footer-mobile ul li {
+    display: inline-block;
+}
+footer #footer-desktop  ul li{
+    padding:15px 0;
+    margin-right: 80px;
+}
+footer #footer-desktop  ul li a{
     color: #fff;
     text-decoration: none;
     -webkit-transition: 0.5s all ease;
@@ -89,7 +110,238 @@ footer a{
     -ms-transition: 0.5s all ease;
     -o-transition: 0.5s all ease;
     transition: 0.5s all ease;
+    font-family: FuturaStd-Heavy, sans-serif;
+    text-transform: uppercase;
+    font-size: 1.5em;
+    letter-spacing: 2px;
 }
-footer a:hover{
+footer #footer-desktop  ul li:last-child{
+    margin-right: 0;
+
+}
+footer #footer-desktop  ul li a:hover{
     color:lightgrey;
 }
+
+footer #footer-mobile {
+    display: none;
+    min-width: 480px;
+    border-top:5px solid #fff;
+}
+footer #footer-mobile ul{
+    display: flex;
+    display:-webkit-flex;
+}
+footer #footer-mobile ul li{
+    padding: 20px ;
+}
+footer #footer-mobile ul li:first-child{
+    background-color:rgba(165,34,40,0.8);
+    border-right:3px solid #fff;
+}
+footer #footer-mobile ul li:nth-child(2){
+    background-color:#a52228;
+    flex:1;
+    -webkit-flex:1;
+    -ms-flex:1;
+}
+footer #footer-mobile ul li:last-child{
+    background-color:rgba(165,34,40,0.8);
+    border-left:3px solid #fff;
+}
+footer #footer-mobile ul li a svg{
+    width: 100px;
+    height: 100px;
+}
+footer #footer-mobile ul li a img{
+    width: 80px;
+    height: 80px;
+    padding: 10px;
+}
+
+@media only screen and (min-device-width: 320px) and (max-device-width: 768px), screen and (max-width: 768px) {
+    footer #footer-desktop {
+        display: none;
+    }
+    footer #footer-mobile{
+        display: block;
+    }
+}
+
+
+/* PAGE ADDIMAGE */
+#image-handler{
+    width: 100%;
+    height: 100%;
+    background-color: #a52228;
+}
+#image-handler .container{
+    margin:0 auto;
+}
+#image-handler .container #logo a{
+    text-decoration: none;
+}
+#image-handler .container #logo a svg{
+    width: 150px;
+    height: 150px;
+}
+#image-handler .container h1{
+    color:#fff;
+    text-align: center;
+    font-family:'FuturaStd-Heavy', sans-serif;
+    text-transform: uppercase;
+    font-size: 3em;
+    letter-spacing: 3px;
+    margin-bottom: 30px;
+}
+#image-handler .container img{
+    width: 200px;
+    height: 150px;
+    display: block;
+    margin: 0 auto 30px auto;
+}
+#image-handler .container form{
+    text-align: center;
+    margin-bottom: 20px;
+}
+#image-handler .container form input[type="file"]{
+    margin-right: 30px;
+}
+#image-handler .container form input[type="submit"]{
+    -webkit-transition: 0.5s all ease;
+    -moz-transition: 0.5s all ease;
+    -ms-transition: 0.5s all ease;
+    -o-transition: 0.5s all ease;
+    transition: 0.5s all ease;
+}
+#image-handler .container form input[type="submit"]:hover{
+    cursor:pointer;
+    background: #ffffff;
+    color:#A52228;
+}
+
+#image-handler .container .filters{
+    text-align: center;
+}
+#image-handler .container .styled-select, #image-handler .container input[type='text']{
+    display: inline-block;
+    margin: 0 auto;
+}
+#image-handler .container .styled-select{
+    position: relative;
+    margin-right: 30px;
+}
+#image-handler .container select, #image-handler .container input[type='text'],#image-handler .container input[type='submit']{
+    background-color:transparent;
+    color:#fff;
+    font-size: 1.6em;
+    border-radius:0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    border:2px solid #fff;
+    text-transform: uppercase;
+    padding: 15px;
+    letter-spacing: 2px;
+}
+::-moz-placeholder{
+    color:#fff;
+}
+:-ms-input-placeholder{
+    color:#fff;
+}
+::-webkit-input-placeholder{
+    color:#fff;
+}
+#image-handler .container select{
+    text-transform: uppercase;
+    appearance:none;
+    -moz-appearance:none; /* Firefox */
+    -webkit-appearance:none; /* Safari and Chrome */
+    padding:15px 30px 15px 15px;
+}
+#image-handler .container .styled-select::after{
+    content: "";
+    position: absolute;
+    top: 22px;
+    right: 15px;
+    width: 15px;
+    height: 8px;
+    background-image: url('../images/fleche.png');
+    background-size: 100% 100%;
+}
+
+/* styles de base si JS est activé */
+.input-file-container {
+    position: relative;
+    display: inline-block;
+    margin-right: 25px;
+}
+.input-file-trigger {
+    background-color:transparent;
+    color:#fff;
+    font-size: 1.6em;
+    border-radius:0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    border:2px solid #fff;
+    text-transform: uppercase;
+    padding: 15px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -ms-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+.input-file {
+    position: absolute;
+    top: 0; left: 0;
+    width: 225px;
+    padding: 14px 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* quelques styles d'interactions */
+.input-file:hover + .input-file-trigger,
+.input-file:focus + .input-file-trigger,
+.input-file-trigger:hover,
+.input-file-trigger:focus {
+    cursor:pointer;
+    background: #ffffff;
+    color:#A52228;
+}
+
+/* styles du retour visuel */
+.file-return {
+    margin: 0;
+}
+.file-return:not(:empty) {
+    margin: 1em 0;
+}
+.file-return {
+    font-family: FuturaStd-Heavy, sans-serif;
+    font-size: 1em;
+    font-style: oblique;
+    color:#fff;
+}
+@media only screen and (min-device-width: 320px) and (max-device-width: 768px), screen and (max-width: 768px) {
+
+    #image-handler #logo{
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    #image-handler .filters #message{
+        display: block;
+    }
+    #image-handler .filters .styled-select{
+        margin-bottom: 20px;
+        margin-right: 0;
+    }
+}
+
+
+

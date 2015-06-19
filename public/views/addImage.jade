@@ -3,31 +3,64 @@ html
         title  ImageWall |
             != title
         script(src="/vendors/jquery.js")
-        link(rel='stylesheet', href='/css/styles2.css')
+        link(rel='stylesheet', href='/css/font.css')
+        link(rel='stylesheet', href='/css/reset.css')
+        link(rel='stylesheet', href='/css/styles.css')
     body
-        h1!= message
+        div#image-handler
+            div.container
+                div#logo
+                    a(href="show-wall").
+                        <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="310.465px" height="302px" viewBox="0 0 310.465 302" enable-background="new 0 0 310.465 302" xml:space="preserve"><rect y="102.889" fill="none" width="310.465" height="111.628"/><text transform="matrix(1 0 0 1 65.54 135.064)"><tspan x="0" y="0" fill="#FFFFFF" font-family="'Lovelo-Black'" font-size="45">Instant </tspan><tspan x="32.366" y="51" fill="#FFFFFF" font-family="'Lovelo-Black'" font-size="45">Wall</tspan></text><polyline fill="none" stroke="#FFFFFF" stroke-width="10" stroke-miterlimit="10" points="264.14,55.742 264.14,255.32 45.499,255.32 45.499,36.679 177.14,36.679 "/></svg>
+                h1!= message
 
-        form(action="/upload", method="post", enctype="multipart/form-data")
-            input(id="file", type="file", name="image", accept="image/*")
-            input(type="submit", value="submit",id="submit")
-        if(image)
-            if(image.filteredUrl)
-                img(src=image.filteredUrl)
-            else
-                img(src=image.formatedUrl)
-        else
-            img(src="")
-        select
-            option(value="None") None
-            option(value="Monochrome") Monochrome
-            option(value="Charcoal") Charcoal
-            option(value="LowColor") LowColor
-            option(value="Negative") Negative
-            option(value="Sepia") Sepia
-            option(value="Colorized") Colorized
-        input#message(type="text", placeholder="One Word Sums Everything",maxlength="10")
+                form(action="/upload", method="post", enctype="multipart/form-data")
+                    div.input-file-container
+                        input(class="input-file" id="my-file" type="file" name="image" accept="image/*" required)
+                        label(for="my-file" class="input-file-trigger" tabindex="0") Choisissez un fichier
+                    input(type="submit", value="envoyer",id="submit")
+                    p.file-return
+                if(image)
+                    if(image.filteredUrl)
+                        img(src=image.filteredUrl)
+                    else
+                        img(src=image.formatedUrl)
+                else
+                    img(src="")
+                div.filters
+                    div.styled-select
+                        select
+                            option(value="None") Pas d'effet
+                            option(value="Monochrome") Monochrome
+                            option(value="Charcoal") Charcoal
+                            option(value="LowColor") LowColor
+                            option(value="Negative") Negative
+                            option(value="Sepia") Sepia
+                            option(value="Colorized") Colorized
+                    input#message(type="text", placeholder="un petit mot...",maxlength="10")
     script(src="/socket.io/socket.io.js")
     script.
+        // ajout de la classe JS à HTML
+        // initialisation des variables
+        var fileInput = document.querySelector(".input-file"),
+                button = document.querySelector(".input-file-trigger"),
+                the_return = document.querySelector(".file-return");
+        // action lorsque la "barre d'espace" ou "Entrée" est pressée
+        button.addEventListener("keydown", function (event) {
+            if (event.keyCode == 13 || event.keyCode == 32) {
+                fileInput.focus();
+            }
+        });
+        // action lorsque le label est cliqué
+        button.addEventListener("click", function (event) {
+            fileInput.focus();
+            return false;
+        });
+        // affiche un retour visuel dès que input:file change
+        fileInput.addEventListener("change", function (event) {
+            the_return.innerHTML = this.value;
+        });
+
         var socket = io();
         var image = !{JSON.stringify(image)}
 
@@ -84,11 +117,11 @@ html
                         value:self.val()
                     },
                     beforeSend:function(){
-                        $('select').hide();
+                        $('select,#message').hide();
                     },
                     success: function (result) {
                         $('img').attr('src',result+'?i='+Date.now());
-                        $('select').show();
+                        $('select,#message').show();
                     }
                 });
             });
