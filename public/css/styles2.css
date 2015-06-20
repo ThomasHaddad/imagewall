@@ -100,6 +100,9 @@ body{
     padding: 15px;
     letter-spacing: 2px;
 }
+#image-handler .container select option{
+    color:#000;
+}
 ::-moz-placeholder{
     color:#fff;
 }
