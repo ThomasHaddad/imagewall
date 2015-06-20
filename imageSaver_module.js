@@ -39,7 +39,7 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make']) {
+                if (data.Properties['exif:Make']!=undefined) {
 
                     if (data.Properties['exif:Make'] == "Apple") {
                         this
@@ -75,7 +75,7 @@ module.exports = {
         gm(self.filePath)
             .identify(function (err, data) {
                 console.log(data.Properties);
-                if (data.Properties['exif:Make']) {
+                if (data.Properties['exif:Make']!=undefined) {
 
                     if (data.Properties['exif:Make'] == "Apple") {
                         self.thanksApple = true;
@@ -108,7 +108,7 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make']) {
+                if (data.Properties['exif:Make']!=undefined) {
 
                     if (data.Properties['exif:Make'] == "Apple") {
                         this
@@ -138,7 +138,7 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make']) {
+                if (data.Properties['exif:Make']!=undefined) {
 
                     if (data.Properties['exif:Make'] == "Apple") {
                         self.thanksApple = true;
