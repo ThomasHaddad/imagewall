@@ -1,7 +1,7 @@
 body{
     background-color: #a52228;
 
-    font-family: Arial, sans-serif;
+    font-family: FuturaStd-Book, sans-serif;
     height: 100%;
     width:100%;
     font-size: 62.5%;
@@ -44,14 +44,17 @@ body{
     margin-bottom: 20px;
 }
 #image-handler .container form input[type="file"]{
+    font-family: FuturaStd-Book, sans-serif;
     margin-right: 30px;
 }
 #image-handler .container form input[type="submit"]{
+    font-family: FuturaStd-Book, sans-serif;
     -webkit-transition: 0.5s all ease;
     -moz-transition: 0.5s all ease;
     -ms-transition: 0.5s all ease;
     -o-transition: 0.5s all ease;
     transition: 0.5s all ease;
+
 }
 #image-handler .container form input[type="submit"]:hover{
     cursor:pointer;
@@ -84,6 +87,7 @@ body{
     margin-right: 30px;
 }
 #image-handler .container select, #image-handler .container input[type='text'],#image-handler .container input[type='submit']{
+    font-family: FuturaStd-Book, sans-serif;
     background-color:transparent;
     color:#fff;
     font-size: 1.6em;
@@ -106,6 +110,7 @@ body{
     color:#fff;
 }
 #image-handler .container select{
+    font-family: FuturaStd-Book, sans-serif;
     text-transform: uppercase;
     appearance:none;
     -moz-appearance:none; /* Firefox */
@@ -130,6 +135,7 @@ body{
     margin: 25px;
 }
 .input-file-trigger {
+    font-family: FuturaStd-Book, sans-serif;
     background-color:transparent;
     color:#fff;
     font-size: 1.6em;
