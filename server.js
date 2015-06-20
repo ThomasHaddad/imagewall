@@ -117,7 +117,7 @@ app.get('/add', function (req, res) {
                 if (img) {
                     res.render('addImage', {title: 'add', message: 'CHANGEZ VOTRE IMAGE', image: img});
                 } else {
-                    res.render('addImage', {title: 'add', message: 'CHARGER UNE IMAGE'});
+                    res.render('addImage', {title: 'add', message: 'CHARGEZ UNE IMAGE'});
 
                 }
 
@@ -127,7 +127,7 @@ app.get('/add', function (req, res) {
             newUser.save(function (err, user) {
                 if (err) throw err;
                 res.cookie('user', user._id, {httpOnly: false});
-                res.render('addImage', {title: 'add', message: 'Add an image'});
+                res.render('addImage', {title: 'add', message: 'CHARGEZ UNE IMAGE'});
             });
         }
     });
@@ -253,26 +253,6 @@ app.post('/sendMessage', function (req, res) {
     });
 });
 
-//app.get('/clear', function (req, res) {
-//    // Delete all the uploaded files
-//    fs.readdir(imageSaver.imageFormat.dirPath, function (err, files) {
-//        if (err) throw err;
-//        files.forEach(function (file) {
-//            fs.unlink(imageSaver.imageFormat.dirPath + file, function () {
-//                if (err) throw err;
-//                console.log('file sucessfully deleted');
-//            });
-//        })
-//    });
-//
-//    // clears database
-//    User.remove({}, function () {
-//        Image.remove({}, function () {
-//            res.clearCookie('user');
-//            res.redirect('/');
-//        });
-//    });
-//});
 
 http.listen(app.get('port'), function () {
     console.log('listening on *:'+app.get('port'));

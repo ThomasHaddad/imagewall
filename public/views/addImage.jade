@@ -21,13 +21,15 @@ html
                         label(for="my-file" class="input-file-trigger" tabindex="0") Choisissez un fichier
                     input(type="submit", value="envoyer",id="submit")
                     p.file-return
+                    p#file-loader
+                        img(src="/images/loader.gif")
                 if(image)
                     if(image.filteredUrl)
-                        img(src=image.filteredUrl)
+                        img#image(src=image.filteredUrl)
                     else
-                        img(src=image.formatedUrl)
+                        img#image(src=image.formatedUrl)
                 else
-                    img(src="")
+                    img#image(src="")
                 div.filters
                     div.styled-select
                         select
@@ -39,6 +41,8 @@ html
                             option(value="Sepia") Sepia
                             option(value="Colorized") Colorized
                     input#message(type="text", placeholder="un petit mot...",maxlength="10")
+                    p#filter-loader
+                        img(src="/images/loader.gif")
     script(src="/socket.io/socket.io.js")
     script.
         // input file styled
@@ -66,8 +70,8 @@ html
 
 
         $(function(){
-            if($('img').attr('src')==''){
-                $('img,.styled-select,#message').hide();
+            if($('#image').attr('src')==''){
+                $('#image,.styled-select,#message').hide();
             }
 
             $('form').submit(function(e){
@@ -84,12 +88,14 @@ html
                     data: data,
                     beforeSend:function(){
                         $('#submit').hide();
+                        $('#file-loader').show();
                     },
                     success: function (result) {
-                        $('img').attr('src',result+'?i='+Date.now());
-                        if($('img').css('display')=='none'){
-                            $('img').show();
+                        $('#image').attr('src',result+'?i='+Date.now());
+                        if($('#image').css('display')=='none'){
+                            $('#image').show();
                         }
+                        $('#file-loader').hide();
                         $('#submit,.styled-select,#message').show();
                         $('select').val('None').attr('selected', 'selected');
                     }
@@ -118,9 +124,11 @@ html
                     },
                     beforeSend:function(){
                         $('.styled-select,#message').hide();
+                        $('#filter-loader').show();
                     },
                     success: function (result) {
-                        $('img').attr('src',result+'?i='+Date.now());
+                        $('#image').attr('src',result+'?i='+Date.now());
+                        $('#filter-loader').hide();
                         $('.styled-select,#message').show();
                     }
                 });
