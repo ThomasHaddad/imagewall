@@ -101,6 +101,7 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
+                console.log(data.Properties);
                 if (data.Properties['exif:Make'] == "Apple") {
                     this
                         .autoOrient()
@@ -128,7 +129,7 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Orientation'] == 6 && data.Properties['exif:Make'] == "Apple") {
+                if (data.Properties['exif:Make'] == "Apple") {
                     self.thanksApple = true;
                 }
                 self.imageFormat.getImageSize(self.filePath, self.thanksApple, function () {
