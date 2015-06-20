@@ -14,7 +14,7 @@ body{
     margin:0;
     min-width: 100vh;
     min-height: 100vh;
-    margin-bottom:70px;
+    padding-bottom:45px;
 }
 #imageWall .image{
     -webkit-user-select: none;
@@ -178,5 +178,8 @@ footer #footer-mobile ul li a svg{
     }
     footer #footer-mobile{
         display: block;
+    }
+    #imageWall{
+        padding-bottom:70px;
     }
 }
