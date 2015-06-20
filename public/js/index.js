@@ -100,11 +100,9 @@ $(function () {
 
                 if (x > bodySize.maxX) {
                     bodySize.maxX = x;
-                    calculateMarginX(x, img);
                 }
                 if (y > bodySize.maxY) {
                     bodySize.maxY = y;
-                    calculateMarginY(y, img);
                 }
                 if (x < bodySize.minX) {
                     bodySize.minX = x;
