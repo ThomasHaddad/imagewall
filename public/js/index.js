@@ -28,7 +28,11 @@ $(function () {
     function calculateMarginX(x) {
         if (x < 0 && origin.left < Math.abs(x * defaultSize.width)) {
             margin.left = Math.abs(x * defaultSize.width) - origin.left;
-            $('#imageWall').css('margin-left', margin.left + "px");
+            $('#imageWall').css({
+                'margin-left': margin.left + "px",
+                width:(Math.abs(bodySize.minX)+Math.abs(bodySize.maxX))*defaultSize.width+"px",
+                height:(Math.abs(bodySize.minY)+Math.abs(bodySize.maxY))*defaultSize.height+"px"
+            });
         }
 
     }
@@ -36,7 +40,11 @@ $(function () {
     function calculateMarginY(y) {
         if (y < 0 && origin.top < Math.abs(y * defaultSize.height)) {
             margin.top = Math.abs(y * defaultSize.height) - origin.top;
-            $('#imageWall').css('margin-top', margin.top + "px");
+            $('#imageWall').css({
+                'margin-top': margin.top + "px",
+                width:(Math.abs(bodySize.minX)+Math.abs(bodySize.maxX))*defaultSize.width+"px",
+                height:(Math.abs(bodySize.minY)+Math.abs(bodySize.maxY))*defaultSize.height+"px"
+            });
         }
     }
 
@@ -77,34 +85,25 @@ $(function () {
         }
     }
 
-    $(window).scroll(function () {
-        $('.not').each(function () {
-
-            if ($(this).visible(true)) {
-                $(this).addClass('animate');
-            }
-        })
-
-    });
 
     // draggable wall
 
 
+
+    $(window).off("scroll");
     // Draw spiral when images are loaded
     $(window).load(function () {
-
         if (images.length) {
-            for (var i = 0; i <= images.length; i++) {
+            for (var i = 0; i <= images.length*100; i++) {
                 img = $('#imageWall .image').eq(i);
                 if ((-width / 2 < x <= width / 2)
                     && (-height / 2 < y <= height / 2)) {
                     if (img.length) {
-
                         if (
                             x + 1 < 0 && origin.left < Math.abs((x + 1) * defaultSize.width)
                             || y + 1 < 0 && origin.top < Math.abs((y + 1) * defaultSize.height)
-                            || x + 1 > 0 && window.innerWidth / 2 < Math.abs(x * defaultSize.width)
-                            || y + 1 > 0 && window.innerHeight / 2 < Math.abs(y * defaultSize.height)
+                            || x > 0 && window.innerWidth / 2 < Math.abs(x * defaultSize.width)
+                            || y > 0 && window.innerHeight / 2 < Math.abs(y * defaultSize.height)
 
                         ) {
                             img.css({
@@ -126,6 +125,7 @@ $(function () {
                             top: (margin.top + origin.top - (window.innerHeight / 2) + defaultSize.height / 2) + "px",
                             left: (margin.left + origin.left - (window.innerWidth / 2) + (defaultSize.width / 2)) + "px"
                         });
+
                         break;
                     }
                 }
@@ -156,6 +156,18 @@ $(function () {
             }
         }
     });
+    setTimeout(function(){
+
+        $(window).scroll(function (e) {
+            if (e.originalEvent){
+                $('.not').each(function () {
+                    if ($(this).visible(true)) {
+                        $(this).addClass('animate').removeClass('not');
+                    }
+                })
+            }
+        });
+    },200);
 
     // hide if no pictures were updated yet
     if (!client) {
@@ -179,6 +191,43 @@ $(function () {
             }
         });
     });
+
+    var clicked = false,moving=false, clickY,clickX,oldPageX,oldPageY,deltaX,deltaY;
+    $.easing.easeOutExpo= function (x, t, b, c, d) {
+        return (t==d) ? b+c : c * (-Math.pow(2, -10 * t/d) + 1) + b;
+    };
+    $("#imageWall").on({
+        'mousemove': function(e) {
+            if(clicked) updateScrollPos(e);
+        },
+        'mousedown': function(e) {
+            e.preventDefault();
+            clicked = true;
+            clickY = e.pageY;
+            clickX = e.pageX;
+        },
+        'mouseup': function(e) {
+            clicked = false;
+            if(moving){
+                $('html').css('cursor', 'auto');
+                deltaX=e.pageX-oldPageX;
+                deltaY=e.pageY-oldPageY;
+                $(window).scrollTo({top:$(window).scrollTop() + (5*deltaY),left:$(window).scrollLeft()+ (5*deltaX)},350,{easing:'easeOutExpo'});
+                moving=false;
+            }
+
+        }
+    });
+
+    var updateScrollPos = function(e) {
+        moving=true;
+        oldPageX=e.pageX;
+        oldPageY=e.pageY;
+        $('html').css('cursor', 'crosshair');
+        $(window).scrollTo({top:$(window).scrollTop() + (clickY - e.pageY),left:$(window).scrollLeft()+ (clickX-e.pageX)});
+    };
+
+
 
     // Sockets listeners
     socket.on("imageAdded", function (data, buffer) {
