@@ -39,15 +39,18 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make'] == "Apple") {
-                    this
-                        .autoOrient()
-                        .write(self.imageFormat.dirPath + nameManager.getRawName(request.files.image.name), function (err) {
-                            fs.unlink(self.imageFormat.dirPath + nameManager.getRawName(currentImage.name), function (err) {
-                                if (err) throw err;
-                                callback(err, data);
+                if (data.Properties['exif:Make']) {
+
+                    if (data.Properties['exif:Make'] == "Apple") {
+                        this
+                            .autoOrient()
+                            .write(self.imageFormat.dirPath + nameManager.getRawName(request.files.image.name), function (err) {
+                                fs.unlink(self.imageFormat.dirPath + nameManager.getRawName(currentImage.name), function (err) {
+                                    if (err) throw err;
+                                    callback(err, data);
+                                });
                             });
-                        });
+                    }
                 } else {
                     this
                         .write(self.imageFormat.dirPath + nameManager.getRawName(request.files.image.name), function (err) {
@@ -71,8 +74,12 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make'] == "Apple") {
-                    self.thanksApple = true;
+                console.log(data.Properties);
+                if (data.Properties['exif:Make']) {
+
+                    if (data.Properties['exif:Make'] == "Apple") {
+                        self.thanksApple = true;
+                    }
                 }
                 self.imageFormat.getImageSize(self.filePath, self.thanksApple, function () {
                     self.imageFormat.cropImage(self.filePath, nameManager.getFormatedName(request.files.image.name), self.thanksApple, function (newFilePath) {
@@ -101,12 +108,15 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make'] == "Apple") {
-                    this
-                        .autoOrient()
-                        .write(self.imageFormat.dirPath + nameManager.getRawName(request.files.image.name), function (err) {
-                            callback(err, data);
-                        });
+                if (data.Properties['exif:Make']) {
+
+                    if (data.Properties['exif:Make'] == "Apple") {
+                        this
+                            .autoOrient()
+                            .write(self.imageFormat.dirPath + nameManager.getRawName(request.files.image.name), function (err) {
+                                callback(err, data);
+                            });
+                    }
                 } else {
                     this
                         .write(self.imageFormat.dirPath + nameManager.getRawName(request.files.image.name), function (err) {
@@ -128,8 +138,11 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make'] == "Apple") {
-                    self.thanksApple = true;
+                if (data.Properties['exif:Make']) {
+
+                    if (data.Properties['exif:Make'] == "Apple") {
+                        self.thanksApple = true;
+                    }
                 }
                 self.imageFormat.getImageSize(self.filePath, self.thanksApple, function () {
                     self.imageFormat.cropImage(self.filePath, nameManager.getFormatedName(request.files.image.name), self.thanksApple, function (newFilePath) {
