@@ -3,7 +3,7 @@ var gm = require('gm').subClass({imageMagick: true});
 var nameManager = require('./nameManager_module');
 var imageFormat = require('./imageFormat_module');
 
-/** @module imageSaver */
+/** @module imageManager */
 module.exports = {
     /**
      * nameNamager dependency

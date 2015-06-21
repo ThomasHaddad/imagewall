@@ -23,17 +23,17 @@ var async = require('async');
 
 
 // image module : covering saving,naming,filtering,cropping,resizing... everything
-var imageSaver = require('./imageSaver_module');
+var imageManager = require('./imageManager_module');
 
-//configuring imageSaver.imageFormat
-imageSaver.imageFormat.setDirectoryPath('./public/uploads/');
-imageSaver.imageFormat.setExpectedImageSize(200,150);
+//configuring imageManager.imageFormat
+imageManager.imageFormat.setDirectoryPath('./public/uploads/');
+imageManager.imageFormat.setExpectedImageSize(200,150);
 
-//configuring imageSaver.nameManager
-imageSaver.nameManager.setRawExtension('-r');
-imageSaver.nameManager.setFormatedExtension('-f');
-imageSaver.nameManager.setFilteredExtension('-m');
-imageSaver.nameManager.setDirectory('/uploads/');
+//configuring imageManager.nameManager
+imageManager.nameManager.setRawExtension('-r');
+imageManager.nameManager.setFormatedExtension('-f');
+imageManager.nameManager.setFilteredExtension('-m');
+imageManager.nameManager.setDirectory('/uploads/');
 
 //Configuring modules
 app.set('view engine', 'jade');
@@ -147,20 +147,20 @@ app.post('/upload', function (req, res) {
                 async.parallel([
                     // RAW IMAGE
                     function (callback) {
-                        imageSaver.overwriteRawImage(req,img,callback);
+                        imageManager.overwriteRawImage(req,img,callback);
                     },
                     // FORMATED IMAGE
                     function (callback) {
                         // manip d'image
-                        imageSaver.overwriteFormatedImage(req,img,callback);
+                        imageManager.overwriteFormatedImage(req,img,callback);
                     }
                 ], function (data) {
                     fs.unlink(tempPath, function (err) {
                         if (err) throw err;
                         img.name = req.files.image.name;
                         img.contentType = req.files.image.mimetype;
-                        img.rawUrl = imageSaver.nameManager.setRawUrl(req, img.name);
-                        img.formatedUrl = imageSaver.nameManager.setFormatedUrl(req, img.name);
+                        img.rawUrl = imageManager.nameManager.setRawUrl(req, img.name);
+                        img.formatedUrl = imageManager.nameManager.setFormatedUrl(req, img.name);
                         img.filteredUrl = null;
                         img.filterType = null;
 
@@ -179,18 +179,18 @@ app.post('/upload', function (req, res) {
                 if (err) throw err;
                 async.parallel([
                     function (callback) {
-                        imageSaver.saveNewRawImage(req,callback)
+                        imageManager.saveNewRawImage(req,callback)
                     },
                     function (callback) {
-                        imageSaver.saveNewFormatedImage(req,callback)
+                        imageManager.saveNewFormatedImage(req,callback)
                     }
                 ], function (data) {
                     fs.unlink(tempPath, function (err) {
                         if (err) throw err;
                         var image = new Image;
                         image.name = req.files.image.name;
-                        image.rawUrl = imageSaver.nameManager.setRawUrl(req, image.name);
-                        image.formatedUrl = imageSaver.nameManager.setFormatedUrl(req, image.name);
+                        image.rawUrl = imageManager.nameManager.setRawUrl(req, image.name);
+                        image.formatedUrl = imageManager.nameManager.setFormatedUrl(req, image.name);
                         image.contentType = req.files.image.mimetype;
                         image.owner = req.cookies.user;
                         image.filterType = null;
@@ -213,10 +213,10 @@ app.post('/filterImage', function (req, res) {
         if (img) {
 
             if (req.body.value != 'None') {
-                imageSaver.imageFormat['set' + req.body.value + 'Image'](imageSaver.imageFormat.dirPath + imageSaver.nameManager.getFormatedName(img.name), imageSaver.nameManager.getFilteredName(img.name), function (err, data) {
+                imageManager.imageFormat['set' + req.body.value + 'Image'](imageManager.imageFormat.dirPath + imageManager.nameManager.getFormatedName(img.name), imageManager.nameManager.getFilteredName(img.name), function (err, data) {
                     if (err) throw err;
 
-                    img.filteredUrl = imageSaver.nameManager.setFilteredUrl(req, img.name);
+                    img.filteredUrl = imageManager.nameManager.setFilteredUrl(req, img.name);
                     img.filterType = req.body.value;
                     img.save(function (err, image) {
                         if (err) throw err;
@@ -225,7 +225,7 @@ app.post('/filterImage', function (req, res) {
                     });
                 });
             } else {
-                fs.unlink(imageSaver.imageFormat.dirPath + imageSaver.nameManager.getFilteredName(img.name), function (err) {
+                fs.unlink(imageManager.imageFormat.dirPath + imageManager.nameManager.getFilteredName(img.name), function (err) {
                     img.filteredUrl = null;
                     img.filterType = null;
                     img.save(function (err, image) {
