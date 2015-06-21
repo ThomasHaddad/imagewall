@@ -130,10 +130,7 @@ $(function () {
         });
     }, 200);
 
-    // hide if no pictures were updated yet
-    if (!client) {
-        $('.locate').hide();
-    }
+
 
 
     // fullscreen
@@ -172,12 +169,15 @@ $(function () {
         }
     }
 
-
+    var ownImage = $(".image[data-self='true']");
+    // hide if no pictures were updated yet
+    if (!client || $(".image[data-self='true']").length == 0) {
+        $('.locate').hide();
+    }
     // Locate button
     $('.locate').on('click', function (e) {
-        var ownImage = $(".image[data-self='true']");
         e.preventDefault();
-
+        ownImage = $(".image[data-self='true']");
         $("body").scrollTo({
             top: ownImage.position().top + margin.top - (window.innerHeight / 2) + (defaultSize.height) + "px",
             left: ownImage.position().left + margin.left - (window.innerHeight / 2) + (defaultSize.width / 2) + "px"
