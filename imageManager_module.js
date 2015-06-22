@@ -39,7 +39,6 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make'] != undefined) {
 
                     if (data.Properties['exif:Make'] == "Apple") {
                         this
@@ -50,7 +49,6 @@ module.exports = {
                                     callback(err, data);
                                 });
                             });
-                    }
                 } else {
                     this
                         .write(self.imageFormat.dirPath + nameManager.getRawName(request.files.image.name), function (err) {
@@ -74,12 +72,10 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make'] != undefined) {
 
                     if (data.Properties['exif:Make'] == "Apple") {
                         self.thanksApple = true;
                     }
-                }
                 self.imageFormat.getImageSize(self.filePath, self.thanksApple, function () {
                     self.imageFormat.cropImage(self.filePath, nameManager.getFormatedName(request.files.image.name), self.thanksApple, function (newFilePath) {
                         self.imageFormat.resizeImage(newFilePath, self.imageFormat.expectedImageSize, function (newFilePath) {
@@ -107,7 +103,6 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make'] != undefined) {
 
                     if (data.Properties['exif:Make'] == "Apple") {
                         this
@@ -115,7 +110,6 @@ module.exports = {
                             .write(self.imageFormat.dirPath + nameManager.getRawName(request.files.image.name), function (err) {
                                 callback(err, data);
                             });
-                    }
                 } else {
                     this
                         .write(self.imageFormat.dirPath + nameManager.getRawName(request.files.image.name), function (err) {
@@ -137,12 +131,10 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-                if (data.Properties['exif:Make'] != undefined) {
 
                     if (data.Properties['exif:Make'] == "Apple") {
                         self.thanksApple = true;
                     }
-                }
                 self.imageFormat.getImageSize(self.filePath, self.thanksApple, function () {
                     self.imageFormat.cropImage(self.filePath, nameManager.getFormatedName(request.files.image.name), self.thanksApple, function (newFilePath) {
                         self.imageFormat.resizeImage(newFilePath, self.imageFormat.expectedImageSize, function () {
