@@ -40,6 +40,7 @@ module.exports = {
         gm(self.filePath)
             .identify(function (err, data) {
                 console.log('identified')
+                console.log(data.Properties['exif:Make'])
                 if (data.Properties['exif:Make'] == "Apple") {
                     console.log('apple');
                     this
@@ -74,6 +75,8 @@ module.exports = {
         gm(self.filePath)
             .identify(function (err, data) {
                 console.log('identified')
+                console.log(data.Properties['exif:Make'])
+
                 if (data.Properties['exif:Make'] == "Apple") {
                     self.thanksApple = true;
                     console.log('apple');
