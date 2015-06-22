@@ -20,9 +20,9 @@ html
                         input(class="input-file" id="my-file" type="file" name="image" accept="image/*" required)
                         label(for="my-file" class="input-file-trigger" tabindex="0") Choisissez un fichier
                     input(type="submit", value="envoyer",id="submit")
-                    p.file-return
-                    p#file-loader
-                        img(src="/images/loader.gif")
+                p.file-return
+                p#file-loader
+                    img(src="/images/loader.gif")
                 if(image)
                     if(image.filteredUrl)
                         img#image(src=image.filteredUrl)
