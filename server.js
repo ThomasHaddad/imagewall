@@ -136,12 +136,9 @@ app.get('/add', function (req, res) {
 app.post('/upload', function (req, res) {
     var tempPath = req.files.image.path;
     if (req.files.image.mimetype.indexOf('image') == -1) {
-        console.log('not image')
         res.json('Only images are accepted');
         res.end();
     }
-
-    console.log('first console');
     Image.findOne({owner: req.cookies.user}, function (err, img) {
         if (err) throw err;
         if (img) {
@@ -177,23 +174,18 @@ app.post('/upload', function (req, res) {
                 })
             });
         } else {
-            console.log('reading file');
             fs.readFile(tempPath, function (err, data) {
-                console.log('fileread');
+
                 if (err) throw err;
                 async.parallel([
                     function (callback) {
-                        console.log('savenewrawimage');
                         imageManager.saveNewRawImage(req,callback)
                     },
                     function (callback) {
-                        console.log('saveformatimage');
                         imageManager.saveNewFormatedImage(req,callback)
                     }
                 ], function (data) {
-                    console.log('callback');
                     fs.unlink(tempPath, function (err) {
-                        console.log('unlinked');
                         if (err) throw err;
                         var image = new Image;
                         image.name = req.files.image.name;
@@ -204,7 +196,6 @@ app.post('/upload', function (req, res) {
                         image.filterType = null;
 
                         image.save(function (err, image) {
-                            console.log('db save')
                             if (err) throw err;
                             io.emit('imageAdded', {image: image.formatedUrl, client: req.cookies.user});
                             res.json(image.formatedUrl);
