@@ -79,6 +79,7 @@ html
                 var formdata = (window.FormData) ? new FormData($form[0]) : null;
                 var data = (formdata !== null) ? formdata : $form.serialize();
                 e.preventDefault();
+                console.log(data);
                 $.ajax({
                     url: '/upload',
                     type: 'POST',
