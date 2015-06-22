@@ -39,8 +39,9 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-
+                console.log('identified')
                 if (data.Properties['exif:Make'] == "Apple") {
+                    console.log('apple');
                     this
                         .autoOrient()
                         .write(self.imageFormat.dirPath + nameManager.getRawName(request.files.image.name), function (err) {
@@ -72,9 +73,10 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-
+                console.log('identified')
                 if (data.Properties['exif:Make'] == "Apple") {
                     self.thanksApple = true;
+                    console.log('apple');
                 }
                 self.imageFormat.getImageSize(self.filePath, self.thanksApple, function () {
                     self.imageFormat.cropImage(self.filePath, nameManager.getFormatedName(request.files.image.name), self.thanksApple, function (newFilePath) {
@@ -133,7 +135,7 @@ module.exports = {
         self.setFilePath(request);
         gm(self.filePath)
             .identify(function (err, data) {
-
+                console.log('identified');
                 if (data.Properties['exif:Make'] == "Apple") {
                     self.thanksApple = true;
                 }
