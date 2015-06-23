@@ -92,7 +92,7 @@ html
                         $('#file-loader').show();
                     },
                     success: function (result) {
-                        $('#image').attr('src',result+'?i='+Date.now());
+                        $('#image').attr('src',result.formatedUrl+'?i='+Date.now());
                         if($('#image').css('display')=='none'){
                             $('#image').show();
                         }
