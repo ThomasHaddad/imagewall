@@ -281,7 +281,7 @@ $(function () {
             } else {
                 $('#imageWall .image[data-client="' + data.client + '"]').removeClass('animate')
                 setTimeout(function () {
-                    $('#imageWall .image[data-client="' + data.client + '"] img').attr('src', data.image)
+                    $('#imageWall .image[data-client="' + data.client + '"] img').attr('src', data.image.formatedUrl)
                     $('#imageWall .image[data-client="' + data.client + '"]').addClass('animate')
                 }, 150);
 
