@@ -117,7 +117,7 @@ module.exports = {
             .identify(function (err, data) {
 
                     self.thanksApple = true;
-                
+
                 self.imageFormat.getImageSize(self.filePath, self.thanksApple, function () {
                     self.imageFormat.cropImage(self.filePath, nameManager.getFormatedName(request.files.image.name), self.thanksApple, function (newFilePath) {
                         self.imageFormat.resizeImage(newFilePath, self.imageFormat.expectedImageSize, function () {

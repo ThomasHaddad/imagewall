@@ -197,8 +197,8 @@ app.post('/upload', function (req, res) {
 
                         image.save(function (err, image) {
                             if (err) throw err;
-                            io.emit('imageAdded', {image: image.formatedUrl, client: req.cookies.user});
-                            res.json(image.formatedUrl);
+                            io.emit('imageAdded', {image: image, client: req.cookies.user});
+                            res.json(image);
                         });
                     });
                 });
