@@ -29,8 +29,8 @@ $(function () {
             margin.left = Math.abs(x * defaultSize.width) - origin.left;
             $('#imageWall').css({
                 'margin-left': margin.left + "px",
-                width: ((Math.abs(bodySize.minX) + Math.abs(bodySize.maxX)+1) * defaultSize.width)-margin.left + "px",
-                height: ((Math.abs(bodySize.minY) + Math.abs(bodySize.maxY)+1) * defaultSize.height)-margin.top+ "px"
+                width: ((Math.abs(bodySize.minX) + Math.abs(bodySize.maxX)+2) * defaultSize.width)-margin.left + "px",
+                height: ((Math.abs(bodySize.minY) + Math.abs(bodySize.maxY)+2) * defaultSize.height)-margin.top+ "px"
             });
         }
 
@@ -41,8 +41,8 @@ $(function () {
             margin.top = Math.abs(y * defaultSize.height) - origin.top;
             $('#imageWall').css({
                 'margin-top': margin.top + "px",
-                width: ((Math.abs(bodySize.minX) + Math.abs(bodySize.maxX)+1) * defaultSize.width)-margin.left + "px",
-                height: ((Math.abs(bodySize.minY) + Math.abs(bodySize.maxY)+1) * defaultSize.height)-margin.top+ "px"
+                width: ((Math.abs(bodySize.minX) + Math.abs(bodySize.maxX)+2) * defaultSize.width)-margin.left + "px",
+                height: ((Math.abs(bodySize.minY) + Math.abs(bodySize.maxY)+2) * defaultSize.height)-margin.top+ "px"
             });
         }
     }
