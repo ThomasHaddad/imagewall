@@ -51,16 +51,7 @@ mongoose.connect('mongodb://localhost/imagewall-dev', function (error) {
         console.log(error);
     }
 });
-// CONFIG PROD
-//app.set('host', '167.114.240.87');
-//app.set('port', 80);
-//
-//// database connection
-//mongoose.connect('mongodb://127.0.0.1:27017/imagewall', function (error) {
-//    if (error) {
-//        console.log(error);
-//    }
-//});
+
 
 
 // Schemas Definitions
